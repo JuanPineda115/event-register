@@ -1,5 +1,4 @@
 'use client';
-
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/Components/Card/Card';
@@ -20,6 +19,8 @@ export default function EventPage({ params }: EventPageProps) {
     if (!params) {
         return;
     }
+
+
     // In a real application, you would fetch event data based on the ID
     const eventData = {
         title: `Event ${params.id}`,
@@ -55,14 +56,8 @@ export default function EventPage({ params }: EventPageProps) {
                     </Typography>
                 </Row>
                 
-                <div style={{ margin: '2rem 0' }}>
+                <Row style={{ margin: '2rem 0' }}>
                     <ProgressBar steps={registrationSteps} />
-                </div>
-
-                <Row justify="center" gap="16">
-                    <Typography>
-                        Por favor, completa tus datos personales
-                    </Typography>
                 </Row>
 
                 <Row justify="center" gap="16" style={{ marginTop: '2rem' }}>

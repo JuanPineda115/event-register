@@ -109,7 +109,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                             <input
                                 type="tel"
                                 id="telefono"
-                                placeholder="+34 XXX XXX XXX"
+                                placeholder="+502 XXXX XXXX"
                                 style={{
                                     width: '100%',
                                     padding: '0.75rem',
@@ -147,7 +147,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                             <input
                                 type="tel"
                                 id="emergencyPhone"
-                                placeholder="+34 XXX XXX XXX"
+                                placeholder="+502 XXXX XXXX"
                                 style={{
                                     width: '100%',
                                     padding: '0.75rem',
@@ -172,6 +172,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                                     borderRadius: '6px',
                                     fontSize: '1rem',
                                     backgroundColor: '#fff'
+                                    
                                 }}
                             >
                                 <option value="">Seleccionar</option>
