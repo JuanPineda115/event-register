@@ -5,19 +5,15 @@ import Row from '@/Components/Row/Row';
 import Cell from '@/Components/Cell/Cell';
 import './ProgressBar.css';
 import Typography from '../Typography/Typography';
-
-interface Step {
-    label: string;
-    completed: boolean;
-    current: boolean;
-}
+import { useRegistrationStore } from '@/stores/registrationStore';
 
 interface ProgressBarProps {
-    steps: Step[];
     className?: string;
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ steps, className = '' }) => {
+const ProgressBar: React.FC<ProgressBarProps> = ({ className = '' }) => {
+    const steps = useRegistrationStore((state) => state.steps);
+
     return (
         <div className={`progress-container ${className}`}>
             <Row justify="space-between" align="center" className="progress-bar">
@@ -31,11 +27,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ steps, className = '' }) => {
                                 <Typography justify className="step-label">{step.label}</Typography>
                             </div>
                         </Cell>
-                        {index < steps.length - 1 && (
-                            <Cell xs={3}>
-                                <div className={`progress-line ${step.completed ? 'completed' : ''}`} />
-                            </Cell>
-                        )}
                     </React.Fragment>
                 ))}
             </Row>

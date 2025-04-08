@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/Components/Card/Card';
 import Container from '@/Components/Container/Container';
@@ -7,37 +7,38 @@ import Typography from '@/Components/Typography/Typography';
 import Row from '@/Components/Row/Row';
 import Button from '@/Components/Button/Button';
 import ProgressBar from '@/Components/ProgressBar/ProgressBar';
+import { useRegistrationStore } from '@/stores/registrationStore';
 
 interface EventPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default function EventPage({ params }: EventPageProps) {
     const router = useRouter();
-    if (!params) {
-        return;
+    const { setCurrentStep } = useRegistrationStore();
+    const resolvedParams = React.use(params);
+    
+    // Set the current step to 0 (index 0) when this page loads
+    useEffect(() => {
+        setCurrentStep(0);
+    }, [setCurrentStep]);
+    
+    if (!resolvedParams) {
+        return null;
     }
-
 
     // In a real application, you would fetch event data based on the ID
     const eventData = {
-        title: `Event ${params.id}`,
+        title: `Event ${resolvedParams.id}`,
         description: 'Registro de evento deportivo',
         imageUrl: '/event-placeholder.jpg', // You'll need to add this image to your public folder
     };
 
-    const registrationSteps = [
-        { label: 'Inicio', completed: true, current: false },
-        { label: 'Información Personal', completed: false, current: true },
-        { label: 'Detalles y reglamento', completed: false, current: false },
-        { label: 'Pago', completed: false, current: false },
-    ];
-
     return (
         <Container>
-            <Card className="event-card">
+            <Card className="registration-card">
                 <Row justify="center" gap="16">
                     <img 
                         src={eventData.imageUrl} 
@@ -57,13 +58,13 @@ export default function EventPage({ params }: EventPageProps) {
                 </Row>
                 
                 <Row style={{ margin: '2rem 0' }}>
-                    <ProgressBar steps={registrationSteps} />
+                    <ProgressBar />
                 </Row>
 
                 <Row justify="center" gap="16" style={{ marginTop: '2rem' }}>
                     <Button 
                         variant="filled"
-                        onClick={() => router.push(`/event/${params.id}/personal-info`)}
+                        onClick={() => router.push(`/event/${resolvedParams.id}/event-detail`)}
                     >
                         Comenzar Registro
                     </Button>

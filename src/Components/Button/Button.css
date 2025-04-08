@@ -18,26 +18,28 @@
 
 /* Filled variant */
 .button.filled {
-    background-color: #fff;
-    color: #000;
+    background-color: #000;
+    color: #fff;
     border: 2px solid #000;
 }
 
 .button.filled:hover:not(:disabled) {
-    background-color: #000;
+    background-color: #fff;
     border-color: #000;
-    color: #fff;
+    color: #000;
 }
 
 /* Outlined variant */
 .button.outlined {
     background-color: transparent;
-    color: #007bff;
-    border: 2px solid #007bff;
+    color: #000;
+    border: 2px solid #000;
 }
 
 .button.outlined:hover:not(:disabled) {
-    background-color: rgba(0, 123, 255, 0.1);
+    background-color: #000;
+    color: #fff;
+    border: 2px solid #000;
 }
 
 /* Full width modifier */
