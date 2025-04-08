@@ -1,0 +1,46 @@
+.button {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Filled variant */
+.button.filled {
+    background-color: #fff;
+    color: #000;
+    border: 2px solid #000;
+}
+
+.button.filled:hover:not(:disabled) {
+    background-color: #000;
+    border-color: #000;
+    color: #fff;
+}
+
+/* Outlined variant */
+.button.outlined {
+    background-color: transparent;
+    color: #007bff;
+    border: 2px solid #007bff;
+}
+
+.button.outlined:hover:not(:disabled) {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Full width modifier */
+.button.full-width {
+    width: 100%;
+}

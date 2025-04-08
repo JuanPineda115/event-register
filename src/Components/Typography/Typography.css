@@ -1,0 +1,57 @@
+.text-left {
+    text-align: left;
+    }
+
+.text-center {
+    text-align: center;
+    }
+
+.text-right {
+    text-align: right;
+    }
+
+.text-justify {
+    text-align: justify;
+    }
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #000;
+    }
+
+.subtitle {
+    font-size: 2rem;
+    font-weight: semi-bold;
+    }
+
+.subsubtitle {
+    font-size: 1.75rem;
+    font-weight: normal;
+    }
+
+.caption {
+    font-size: 1.2rem;
+    font-style: italic;
+    }
+
+.link {
+    font-size: 1rem;
+    color: #007bff;
+    text-decoration: none;
+    }
+
+.label {
+    font-size: 1rem;
+    font-weight: bold;
+    }
+
+.error {
+    color: red;
+    font-size: 1rem;
+    }
+
+.text {
+    font-size: 1rem;
+    color: #333;
+}

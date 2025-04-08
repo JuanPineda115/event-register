@@ -1,0 +1,10 @@
+.container {
+    width: 100%;
+    /*max-width: 1200px; /* Máximo ancho */
+    margin: 0 auto; /* Centrado automático */
+    padding: 0 20px; /* Espaciado interior */
+    box-sizing: border-box; /* Para no afectar el tamaño total */
+    display: flex;
+    align-items: center;
+    min-height: 85vh;
+}
