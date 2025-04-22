@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Container from '@/Components/Container/Container';
 import Row from '@/Components/Row/Row';
 import Cell from '@/Components/Cell/Cell';
@@ -8,13 +8,21 @@ import Typography from '@/Components/Typography/Typography';
 import Button from '@/Components/Button/Button';
 
 interface EventDetailAdminPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default function EventDetailAdminPage({ params }: EventDetailAdminPageProps) {
-  // ... [Keep all the existing state and handlers from the previous file]
+  const [eventId, setEventId] = useState<string>('');
+
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setEventId(resolvedParams.id);
+    });
+  }, [params]);
+
   const [rules, setRules] = useState<string[]>([]);
   const [schedule, setSchedule] = useState<Array<{time: string; activity: string}>>([]);
   const [requirements, setRequirements] = useState<string[]>([]);
