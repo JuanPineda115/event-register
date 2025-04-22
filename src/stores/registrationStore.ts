@@ -14,8 +14,10 @@ export interface PersonalInfo {
     lastName: string;
     email: string;
     phone: string;
+    phoneCountry: string;
     emergencyContact: string;
     emergencyPhone: string;
+    emergencyPhoneCountry: string;
     category: string;
     size: string;
     gender: string;
@@ -27,8 +29,10 @@ export interface FormErrors {
     lastName?: string;
     email?: string;
     phone?: string;
+    phoneCountry?: string;
     emergencyContact?: string;
     emergencyPhone?: string;
+    emergencyPhoneCountry?: string;
     category?: string;
     size?: string;
     gender?: string;
@@ -66,8 +70,10 @@ const initialPersonalInfo: PersonalInfo = {
     lastName: '',
     email: '',
     phone: '',
+    phoneCountry: '',
     emergencyContact: '',
     emergencyPhone: '',
+    emergencyPhoneCountry: '',
     category: '',
     size: '',
     gender: '',
@@ -84,10 +90,25 @@ const validateEmail = (email: string): string | undefined => {
     return undefined;
 };
 
-const validatePhone = (phone: string): string | undefined => {
+// Phone number validation by country
+const phoneValidationRules: { [key: string]: { pattern: RegExp, length: number } } = {
+    'CR': { pattern: /^\d+$/, length: 8 },
+    'GT': { pattern: /^\d+$/, length: 8 },
+    'US': { pattern: /^\d+$/, length: 10 },
+    'MX': { pattern: /^\d+$/, length: 10 },
+    // Add more countries as needed
+};
+
+const validatePhone = (phone: string, country: string): string | undefined => {
+    if (!country) return 'Debe seleccionar un país';
     if (!phone) return 'El teléfono es requerido';
-    const phoneRegex = /^\d{8}$/;
-    if (!phoneRegex.test(phone)) return 'El teléfono debe tener 8 dígitos sin espacios';
+    
+    const rules = phoneValidationRules[country];
+    if (!rules) return 'País no soportado';
+    
+    if (!rules.pattern.test(phone)) return 'El teléfono solo debe contener dígitos';
+    if (phone.length !== rules.length) return `El teléfono debe tener ${rules.length} dígitos para ${country}`;
+    
     return undefined;
 };
 
@@ -144,8 +165,14 @@ export const useRegistrationStore = create<RegistrationState>()(
                             error = validateEmail(value);
                             break;
                         case 'phone':
+                            error = validatePhone(value, state.personalInfo.phoneCountry);
+                            break;
                         case 'emergencyPhone':
-                            error = validatePhone(value);
+                            error = validatePhone(value, state.personalInfo.emergencyPhoneCountry);
+                            break;
+                        case 'phoneCountry':
+                        case 'emergencyPhoneCountry':
+                            error = validateRequired(value, 'País');
                             break;
                         case 'firstName':
                             error = validateRequired(value, 'Nombre');
@@ -191,8 +218,14 @@ export const useRegistrationStore = create<RegistrationState>()(
                             error = validateEmail(value);
                             break;
                         case 'phone':
+                            error = validatePhone(value, personalInfo.phoneCountry);
+                            break;
                         case 'emergencyPhone':
-                            error = validatePhone(value);
+                            error = validatePhone(value, personalInfo.emergencyPhoneCountry);
+                            break;
+                        case 'phoneCountry':
+                        case 'emergencyPhoneCountry':
+                            error = validateRequired(value, 'País');
                             break;
                         default:
                             error = validateRequired(value, field);

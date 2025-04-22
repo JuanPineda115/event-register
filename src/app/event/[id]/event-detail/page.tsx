@@ -48,7 +48,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   }, [setCurrentStep]);
 
   const handleBack = () => {
-    router.back();
+    router.push(`/event/${resolvedParams.id}/`);
   };
 
   const handleRegister = () => {
@@ -58,7 +58,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   return (
     <Container>
       <Card className="registration-card">
-        <Row justify="center" gap="16">
+        <Row justify="center" >
           <Typography type="title">Detalles del Evento</Typography>
         </Row>
 

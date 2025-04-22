@@ -26,14 +26,56 @@ interface PersonalInfoPageProps {
     }>;
 }
 
+interface PersonalInfo {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    phoneCountry: string;
+    emergencyContact: string;
+    emergencyPhone: string;
+    emergencyPhoneCountry: string;
+    gender: string;
+    category: string;
+    size: string;
+}
+
+interface FormErrors {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    phoneCountry?: string;
+    emergencyContact?: string;
+    emergencyPhone?: string;
+    emergencyPhoneCountry?: string;
+    gender?: string;
+    category?: string;
+    size?: string;
+}
+
+// Definición de países con sus códigos y longitudes de teléfono
+const countries = [
+    { code: 'GT', name: 'GT', phoneCode: '+502', minLength: 8, maxLength: 8 },
+    { code: 'SV', name: 'SV', phoneCode: '+503', minLength: 8, maxLength: 8 },
+    { code: 'HN', name: 'HN', phoneCode: '+504', minLength: 8, maxLength: 8 },
+    { code: 'NI', name: 'NI', phoneCode: '+505', minLength: 8, maxLength: 8 },
+    { code: 'CR', name: 'CR', phoneCode: '+506', minLength: 8, maxLength: 8 },
+    { code: 'PA', name: 'PA', phoneCode: '+507', minLength: 8, maxLength: 8 },
+    { code: 'MX', name: 'MX', phoneCode: '+52', minLength: 10, maxLength: 10 },
+    { code: 'US', name: 'US', phoneCode: '+1', minLength: 10, maxLength: 10 },
+];
+
 // Default values for the form
-const defaultPersonalInfo = {
+const defaultPersonalInfo: PersonalInfo = {
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
+    phoneCountry: '',
     emergencyContact: '',
     emergencyPhone: '',
+    emergencyPhoneCountry: '',
     gender: '',
     category: '',
     size: '',
@@ -42,16 +84,16 @@ const defaultPersonalInfo = {
 export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
     const router = useRouter();
     const { 
-        personalInfo = defaultPersonalInfo, // Provide default value
+        personalInfo = defaultPersonalInfo,
         updatePersonalInfo, 
         setCurrentStep,
         validateField,
         validateForm,
-        formErrors = {} // Provide default value for formErrors
+        formErrors = {}
     } = useRegistrationStore();
+
     const resolvedParams = React.use(params);
     
-    // Set the current step to 2 (index 2) when this page loads
     useEffect(() => {
         setCurrentStep(2);
     }, [setCurrentStep]);
@@ -62,6 +104,23 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
         
         updatePersonalInfo({ [field]: value });
         validateField(field, value);
+
+        if (field === 'phoneCountry' || field === 'emergencyPhoneCountry') {
+            const phoneField = field === 'phoneCountry' ? 'phone' : 'emergencyPhone';
+            const currentPhone = personalInfo[phoneField];
+            if (currentPhone) {
+                validateField(phoneField, currentPhone);
+            }
+        }
+    };
+
+    const getPhoneValidation = (countryCode: string) => {
+        const country = countries.find(c => c.code === countryCode);
+        return country ? {
+            minLength: country.minLength,
+            maxLength: country.maxLength,
+            phoneCode: country.phoneCode
+        } : null;
     };
 
     const handleNext = () => {
@@ -73,7 +132,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
     return (
         <Container>
             <Card className="registration-card">
-                <Row justify="center" gap="16">
+                <Row justify="center">
                     <Typography type="title">
                         Información Personal
                     </Typography>
@@ -83,7 +142,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                     <ProgressBar />
                 </div>
 
-                <Row justify="center" gap="16">
+                <Row justify="center">
                     <Typography>
                         Por favor, completa tus datos personales
                     </Typography>
@@ -123,9 +182,9 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                                 <MenuItem value="">
                                     <em>Seleccionar</em>
                                 </MenuItem>
-                                <MenuItem value="masculino">Masculino</MenuItem>
-                                <MenuItem value="femenino">Femenino</MenuItem>
-                                <MenuItem value="otro">Otro</MenuItem>
+                                <MenuItem value="M">Masculino</MenuItem>
+                                <MenuItem value="F">Femenino</MenuItem>
+                                <MenuItem value="O">Otro</MenuItem>
                             </Select>
                             {formErrors.gender && (
                                 <FormHelperText>{formErrors.gender}</FormHelperText>
@@ -143,16 +202,49 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                             helperText={formErrors.email}
                         />
 
-                        <TextField
-                            fullWidth
-                            label="Teléfono"
-                            name="phone"
-                            value={personalInfo.phone}
-                            onChange={handleInputChange}
-                            error={!!formErrors.phone}
-                            helperText={formErrors.phone}
-                            inputProps={{ maxLength: 8 }}
-                        />
+                        {/* Teléfono Personal con Selección de País */}
+                        <Row>
+                            <Cell xs={4} className="pr-2">
+                                <FormControl fullWidth error={!!formErrors.phoneCountry}>
+                                    <InputLabel id="phone-country-label">País</InputLabel>
+                                    <Select
+                                        labelId="phone-country-label"
+                                        name="phoneCountry"
+                                        value={personalInfo.phoneCountry}
+                                        onChange={handleInputChange}
+                                        label="País"
+                                    >
+                                        <MenuItem value="">
+                                            <em>Seleccionar</em>
+                                        </MenuItem>
+                                        {countries.map((country) => (
+                                            <MenuItem key={country.code} value={country.code}>
+                                                {country.name} ({country.phoneCode})
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    {formErrors.phoneCountry && (
+                                        <FormHelperText>{formErrors.phoneCountry}</FormHelperText>
+                                    )}
+                                </FormControl>
+                            </Cell>
+                            <Cell xs={8}>
+                                <TextField
+                                    fullWidth
+                                    label="Teléfono"
+                                    name="phone"
+                                    value={personalInfo.phone}
+                                    onChange={handleInputChange}
+                                    error={!!formErrors.phone}
+                                    helperText={formErrors.phone}
+                                    disabled={!personalInfo.phoneCountry}
+                                    placeholder={personalInfo.phoneCountry ? 
+                                        `${getPhoneValidation(personalInfo.phoneCountry)?.phoneCode || ''} Ingrese su número` : 
+                                        'Seleccione un país primero'
+                                    }
+                                />
+                            </Cell>
+                        </Row>
 
                         <TextField
                             fullWidth
@@ -164,16 +256,49 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                             helperText={formErrors.emergencyContact}
                         />
 
-                        <TextField
-                            fullWidth
-                            label="Teléfono de Contacto de Emergencia"
-                            name="emergencyPhone"
-                            value={personalInfo.emergencyPhone}
-                            onChange={handleInputChange}
-                            error={!!formErrors.emergencyPhone}
-                            helperText={formErrors.emergencyPhone}
-                            inputProps={{ maxLength: 8 }}
-                        />
+                        {/* Teléfono de Emergencia con Selección de País */}
+                        <Row>
+                            <Cell xs={4} className="pr-2">
+                                <FormControl fullWidth error={!!formErrors.emergencyPhoneCountry}>
+                                    <InputLabel id="emergency-phone-country-label">País</InputLabel>
+                                    <Select
+                                        labelId="emergency-phone-country-label"
+                                        name="emergencyPhoneCountry"
+                                        value={personalInfo.emergencyPhoneCountry}
+                                        onChange={handleInputChange}
+                                        label="País"
+                                    >
+                                        <MenuItem value="">
+                                            <em>Seleccionar</em>
+                                        </MenuItem>
+                                        {countries.map((country) => (
+                                            <MenuItem key={country.code} value={country.code}>
+                                                {country.name} ({country.phoneCode})
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    {formErrors.emergencyPhoneCountry && (
+                                        <FormHelperText>{formErrors.emergencyPhoneCountry}</FormHelperText>
+                                    )}
+                                </FormControl>
+                            </Cell>
+                            <Cell xs={8}>
+                                <TextField
+                                    fullWidth
+                                    label="Teléfono de Emergencia"
+                                    name="emergencyPhone"
+                                    value={personalInfo.emergencyPhone}
+                                    onChange={handleInputChange}
+                                    error={!!formErrors.emergencyPhone}
+                                    helperText={formErrors.emergencyPhone}
+                                    disabled={!personalInfo.emergencyPhoneCountry}
+                                    placeholder={personalInfo.emergencyPhoneCountry ? 
+                                        `${getPhoneValidation(personalInfo.emergencyPhoneCountry)?.phoneCode || ''} Ingrese su número` : 
+                                        'Seleccione un país primero'
+                                    }
+                                />
+                            </Cell>
+                        </Row>
 
                         <FormControl fullWidth error={!!formErrors.category}>
                             <InputLabel id="category-label">Categoría</InputLabel>

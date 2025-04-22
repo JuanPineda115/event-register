@@ -39,7 +39,7 @@ export default function EventPage({ params }: EventPageProps) {
     return (
         <Container>
             <Card className="registration-card">
-                <Row justify="center" gap="16">
+                <Row justify="center" >
                     <img 
                         src={eventData.imageUrl} 
                         alt={eventData.title}
@@ -51,7 +51,7 @@ export default function EventPage({ params }: EventPageProps) {
                         }} 
                     />
                 </Row>
-                <Row justify="center" gap="16">
+                <Row justify="center" >
                     <Typography type="title">
                         {eventData.description}
                     </Typography>
@@ -61,7 +61,7 @@ export default function EventPage({ params }: EventPageProps) {
                     <ProgressBar />
                 </Row>
 
-                <Row justify="center" gap="16" style={{ marginTop: '2rem' }}>
+                <Row justify="center"  style={{ marginTop: '2rem' }}>
                     <Button 
                         variant="filled"
                         onClick={() => router.push(`/event/${resolvedParams.id}/event-detail`)}

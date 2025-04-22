@@ -32,15 +32,3 @@
         justify-content: space-around;
     }
     
-.row-gap-0 {
-        gap: 0;
-    }
-    
-.row-gap-10 {
-        gap: 10px;
-    }
-    
-.row-gap-20 {
-        gap: 20px;
-    }
-    

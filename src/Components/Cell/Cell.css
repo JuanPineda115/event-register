@@ -1,6 +1,7 @@
 .cell {
     box-sizing: border-box;
     padding: 10px;
+    padding-left: 0;
     flex-grow: 0;
     flex-shrink: 0;
 }

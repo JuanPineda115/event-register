@@ -6,17 +6,21 @@ interface RowProps {
     className?: string;
     align?: 'left' | 'center' | 'right';
     justify?: 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around';
-    gap?: string;
+    gap?: number;
     style?: CSSProperties;
 }
 
-const Row: React.FC<RowProps> = ({ children, className = '', align = 'left', justify = 'flex-start', gap = '0', style }) => {
+const Row: React.FC<RowProps> = ({ children, className = '', align = 'left', justify = 'flex-start', gap = 0, style }) => {
     const alignClass = `row-align-${align}`;
     const justifyClass = `row-justify-${justify}`;
-    const gapClass = `row-gap-${gap}`;
+
+    const combinedStyle: CSSProperties = {
+        ...style,
+        gap: gap ? `${gap}rem` : undefined
+    };
 
     return (
-        <div className={`row ${alignClass} ${justifyClass} ${gapClass} ${className}`} style={style}>
+        <div className={`row ${alignClass} ${justifyClass} ${className}`} style={combinedStyle}>
             {children}
         </div>
     );

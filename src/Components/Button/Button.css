@@ -9,6 +9,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    min-width: 110px;
 }
 
 .button:disabled {
