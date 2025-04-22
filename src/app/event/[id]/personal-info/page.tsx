@@ -16,7 +16,8 @@ import {
     MenuItem, 
     FormControl, 
     InputLabel, 
-    FormHelperText 
+    FormHelperText,
+    SelectChangeEvent
 } from '@mui/material';
 
 interface PersonalInfoPageProps {
@@ -34,6 +35,8 @@ const defaultPersonalInfo = {
     emergencyContact: '',
     emergencyPhone: '',
     gender: '',
+    category: '',
+    size: '',
 };
 
 export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
@@ -53,7 +56,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
         setCurrentStep(2);
     }, [setCurrentStep]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
         const field = e.target.name as keyof typeof personalInfo;
         const value = e.target.value as string;
         
@@ -108,6 +111,27 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                             helperText={formErrors.lastName}
                         />
 
+                        <FormControl fullWidth error={!!formErrors.gender}>
+                            <InputLabel id="gender-label">Sexo</InputLabel>
+                            <Select
+                                labelId="gender-label"
+                                name="gender"
+                                value={personalInfo.gender}
+                                onChange={handleInputChange}
+                                label="Sexo"
+                            >
+                                <MenuItem value="">
+                                    <em>Seleccionar</em>
+                                </MenuItem>
+                                <MenuItem value="masculino">Masculino</MenuItem>
+                                <MenuItem value="femenino">Femenino</MenuItem>
+                                <MenuItem value="otro">Otro</MenuItem>
+                            </Select>
+                            {formErrors.gender && (
+                                <FormHelperText>{formErrors.gender}</FormHelperText>
+                            )}
+                        </FormControl>
+
                         <TextField
                             fullWidth
                             label="Correo Electrónico"
@@ -151,24 +175,46 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                             inputProps={{ maxLength: 8 }}
                         />
 
-                        <FormControl fullWidth error={!!formErrors.gender}>
-                            <InputLabel id="gender-label">Sexo</InputLabel>
+                        <FormControl fullWidth error={!!formErrors.category}>
+                            <InputLabel id="category-label">Categoría</InputLabel>
                             <Select
-                                labelId="gender-label"
-                                name="gender"
-                                value={personalInfo.gender}
+                                labelId="category-label"
+                                name="category"
+                                value={personalInfo.category}
                                 onChange={handleInputChange}
-                                label="Sexo"
+                                label="Categoría"
                             >
                                 <MenuItem value="">
                                     <em>Seleccionar</em>
                                 </MenuItem>
-                                <MenuItem value="masculino">Masculino</MenuItem>
-                                <MenuItem value="femenino">Femenino</MenuItem>
-                                <MenuItem value="otro">Otro</MenuItem>
+                                <MenuItem value="lightweight">Lightweight</MenuItem>
+                                <MenuItem value="heavyweight">Heavyweight</MenuItem>
                             </Select>
-                            {formErrors.gender && (
-                                <FormHelperText>{formErrors.gender}</FormHelperText>
+                            {formErrors.category && (
+                                <FormHelperText>{formErrors.category}</FormHelperText>
+                            )}
+                        </FormControl>
+
+                        <FormControl fullWidth error={!!formErrors.size}>
+                            <InputLabel id="size-label">Talla</InputLabel>
+                            <Select
+                                labelId="size-label"
+                                name="size"
+                                value={personalInfo.size}
+                                onChange={handleInputChange}
+                                label="Talla"
+                            >
+                                <MenuItem value="">
+                                    <em>Seleccionar</em>
+                                </MenuItem>
+                                <MenuItem value="S">S</MenuItem>
+                                <MenuItem value="M">M</MenuItem>
+                                <MenuItem value="L">L</MenuItem>
+                                <MenuItem value="XL">XL</MenuItem>
+                                <MenuItem value="XXL">XXL</MenuItem>
+                            </Select>
+                            {formErrors.size && (
+                                <FormHelperText>{formErrors.size}</FormHelperText>
                             )}
                         </FormControl>
                     </div>

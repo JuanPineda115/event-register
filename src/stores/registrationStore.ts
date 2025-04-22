@@ -16,6 +16,8 @@ export interface PersonalInfo {
     phone: string;
     emergencyContact: string;
     emergencyPhone: string;
+    category: string;
+    size: string;
     gender: string;
 }
 
@@ -27,6 +29,8 @@ export interface FormErrors {
     phone?: string;
     emergencyContact?: string;
     emergencyPhone?: string;
+    category?: string;
+    size?: string;
     gender?: string;
 }
 
@@ -64,6 +68,8 @@ const initialPersonalInfo: PersonalInfo = {
     phone: '',
     emergencyContact: '',
     emergencyPhone: '',
+    category: '',
+    size: '',
     gender: '',
 };
 
@@ -88,6 +94,14 @@ const validatePhone = (phone: string): string | undefined => {
 const validateRequired = (value: string, fieldName: string): string | undefined => {
     if (!value) return `${fieldName} es requerido`;
     return undefined;
+};
+
+const validateCategory = (category: string): string | undefined => {
+    if (!category) return 'La categoría es requerida';
+};
+
+const validateSize = (size: string): string | undefined => {
+    if (!size) return 'La talla es requerida';
 };
 
 // Create the store
@@ -141,6 +155,12 @@ export const useRegistrationStore = create<RegistrationState>()(
                             break;
                         case 'emergencyContact':
                             error = validateRequired(value, 'Contacto de emergencia');
+                            break;
+                        case 'category':
+                            error = validateCategory(value);
+                            break;
+                        case 'size':
+                            error = validateSize(value);
                             break;
                         case 'gender':
                             error = validateRequired(value, 'Sexo');
