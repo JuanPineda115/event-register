@@ -72,7 +72,7 @@ export default function EventDetailAdminPage({ params }: EventDetailAdminPagePro
         {/* Rules Section */}
         <Cell className="mb-6">
           <Typography type="subtitle">Reglas del Evento</Typography>
-          <Row justify="space-between" gap="1rem" className="mb-4">
+          <Row justify="space-between" gap={1} className="mb-4">
             <Cell xs={9}>
               <input
                 type="text"
@@ -110,7 +110,7 @@ export default function EventDetailAdminPage({ params }: EventDetailAdminPagePro
         {/* Schedule Section */}
         <Cell className="mb-6">
           <Typography type="subtitle">Horario del Evento</Typography>
-          <Row justify="space-between" gap="1rem" className="mb-4">
+          <Row justify="space-between" gap={1} className="mb-4">
             <Cell xs={3}>
               <input
                 type="time"
@@ -160,7 +160,7 @@ export default function EventDetailAdminPage({ params }: EventDetailAdminPagePro
         {/* Requirements Section */}
         <Cell className="mb-6">
           <Typography type="subtitle">Requisitos del Evento</Typography>
-          <Row justify="space-between" gap="1rem" className="mb-4">
+          <Row justify="space-between" gap={1} className="mb-4">
             <Cell xs={9}>
               <input
                 type="text"

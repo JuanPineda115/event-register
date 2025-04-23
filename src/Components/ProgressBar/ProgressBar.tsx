@@ -19,7 +19,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ className = '' }) => {
             <Row justify="space-between" align="center" className="progress-bar">
                 {steps.map((step, index) => (
                     <React.Fragment key={index}>
-                        <Cell xs={3}>
+                        <Cell xs={6} sm={3}>
                             <div className={`progress-step ${step.completed ? 'completed' : ''} ${step.current ? 'current' : ''}`}>
                                 <div className="step-number">
                                     {step.completed ? '✓' : index + 1}

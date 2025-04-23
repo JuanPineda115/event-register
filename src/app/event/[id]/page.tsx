@@ -57,7 +57,7 @@ export default function EventPage({ params }: EventPageProps) {
                     </Typography>
                 </Row>
                 
-                <Row style={{ margin: '2rem 0' }}>
+                <Row>
                     <ProgressBar />
                 </Row>
 

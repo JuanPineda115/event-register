@@ -27,8 +27,9 @@
     }
 
 .subsubtitle {
-    font-size: 1.75rem;
-    font-weight: normal;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #000;
     }
 
 .caption {

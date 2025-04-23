@@ -58,92 +58,47 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   return (
     <Container>
       <Card className="registration-card">
-        <Row justify="center" >
-          <Typography type="title">Detalles del Evento</Typography>
+        <Row justify="center">
+          <Typography align='center' type="title">Detalles del Evento</Typography>
         </Row>
 
-        <div style={{ margin: '2rem 0' }}>
+        <Row>
           <ProgressBar />
-        </div>
+        </Row>
 
-        {/* Rules Section */}
-        <div style={{ margin: "2rem 0" }}>
-          <Row className="mb-4">
-            <Cell xs={12}>
-              <Typography type="subtitle">Reglas del Evento</Typography>
-            </Cell>
-          </Row>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            {mockEventData.rules.map((rule, index) => (
-              <Row key={index} className="mb-3">
-                <Cell xs={12} className="flex items-start">
-                  <span className="text-blue-500 mr-3 font-bold">•</span>
-                  <Typography>{rule}</Typography>
-                </Cell>
-              </Row>
-            ))}
-          </div>
-        </div>
 
-        {/* Schedule Section */}
-        <div style={{ margin: "2rem 0" }}>
-          <Row className="mb-4">
-            <Cell xs={12}>
-              <Typography type="subtitle">Horario del Evento</Typography>
-            </Cell>
-          </Row>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            {mockEventData.schedule.map((item, index) => (
-              <Row key={index} className="mb-4" align="center">
-                <Cell xs={3} md={2}>
-                  <Typography type="subtitle" className="text-blue-600">
-                    {item.time}
-                  </Typography>
-                </Cell>
-                <Cell
-                  xs={9}
-                  md={10}
-                  className="border-l-2 border-blue-100 pl-4"
-                >
-                  <Typography>{item.activity}</Typography>
-                </Cell>
-              </Row>
-            ))}
-          </div>
-        </div>
+        <Row >
+          <Typography type="subtitle">Descripcion del Evento</Typography>
+        </Row>
 
-        {/* Requirements Section */}
-        <div style={{ margin: "2rem 0" }}>
-          <Row className="mb-4">
-            <Cell xs={12}>
-              <Typography type="subtitle">Requisitos del Evento</Typography>
-            </Cell>
-          </Row>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            {mockEventData.requirements.map((requirement, index) => (
-              <Row key={index} className="mb-3">
-                <Cell xs={12} className="flex items-start">
-                  <span className="text-blue-500 mr-3 font-bold">•</span>
-                  <Typography>{requirement}</Typography>
-                </Cell>
-              </Row>
-            ))}
-          </div>
-        </div>
+        <Row>
+          <Typography type="text">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </Typography>
+        </Row>
 
-        {/* Action Buttons */}
+        <Row>
+            <Typography type="subtitle">Ubicación del Evento</Typography>
+        </Row>
+        <Row>
+            <Typography type="text">Ciudad de Guatemala</Typography>
+        </Row>
+
         <Row justify="center" style={{ marginTop: "2rem" }}>
           <Cell xs={4}>
             <Button variant="outlined" onClick={handleBack} fullWidth>
               Volver
             </Button>
           </Cell>
+
           <Cell xs={4}>
             <Button variant="filled" onClick={handleRegister} fullWidth>
               Inscribirse
             </Button>
           </Cell>
         </Row>
+
       </Card>
     </Container>
   );
