@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
 import Container from "@/Components/Container/Container";
 import Row from "@/Components/Row/Row";
@@ -10,6 +10,7 @@ import Button from "@/Components/Button/Button";
 import Card from "@/Components/Card/Card";
 import ProgressBar from '@/Components/ProgressBar/ProgressBar';
 import { useRegistrationStore } from '@/stores/registrationStore';
+import { Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
 
 interface EventDetailPageProps {
   params: Promise<{
@@ -19,28 +20,23 @@ interface EventDetailPageProps {
 
 // Mock data - Replace with actual API call
 const mockEventData = {
-  rules: [
-    "Llegar puntual al evento",
-    "Traer identificación oficial",
-    "Seguir las instrucciones del personal",
-  ],
-  schedule: [
-    { time: "07:00", activity: "Registro de participantes" },
-    { time: "08:00", activity: "Calentamiento y briefing" },
-    { time: "09:00", activity: "Inicio del evento" },
-    { time: "17:00", activity: "Ceremonia de premiación" },
-  ],
-  requirements: [
-    "Ropa deportiva adecuada",
-    "Botella de agua",
-    "Formulario médico completado",
-  ],
+
+  pricing: {
+    individualPrice: 100,
+    individualFee: 10,
+    teamPrice: 500,
+    teamFee: 50,
+    spectatorPrice: 30,
+    spectatorFee: 5,
+  },
+  registrationTypes: ['Individual', 'Por grupo', 'Individual y Grupos', 'Espectador']
 };
 
 export default function EventDetailPage({ params }: EventDetailPageProps) {
   const router = useRouter();
   const { setCurrentStep } = useRegistrationStore();
   const resolvedParams = React.use(params);
+  const [registrationType, setRegistrationType] = useState('');
 
   // Set the current step to 1 (index 1) when this page loads
   useEffect(() => {
@@ -52,7 +48,15 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   };
 
   const handleRegister = () => {
-    router.push(`/event/${resolvedParams.id}/personal-info`);
+    if (registrationType === 'Por grupo' || registrationType === 'Individual y Grupos') {
+      router.push(`/event/${resolvedParams.id}/group-info`);
+    } else {
+      router.push(`/event/${resolvedParams.id}/personal-info`);
+    }
+  };
+
+  const handleRegistrationTypeChange = (event: any) => {
+    setRegistrationType(event.target.value);
   };
 
   return (
@@ -66,8 +70,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           <ProgressBar />
         </Row>
 
-
-        <Row >
+        <Row>
           <Typography type="subtitle">Descripcion del Evento</Typography>
         </Row>
 
@@ -79,10 +82,52 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
         </Row>
 
         <Row>
-            <Typography type="subtitle">Ubicación del Evento</Typography>
+          <Typography type="subtitle">Ubicación del Evento</Typography>
         </Row>
         <Row>
-            <Typography type="text">Ciudad de Guatemala</Typography>
+          <Typography type="text">Ciudad de Guatemala</Typography>
+        </Row>
+
+        <Row>
+          <Typography type="subtitle">Precios</Typography>
+        </Row>
+        <Row>
+          <Box sx={{ width: '100%' }}>
+            {mockEventData.pricing.individualPrice && (
+              <Typography type="text">
+                Precio individual: ${mockEventData.pricing.individualPrice}
+                {mockEventData.pricing.individualFee && ` + Fee: $${mockEventData.pricing.individualFee}`}
+              </Typography>
+            )}
+            {mockEventData.pricing.teamPrice && (
+              <Typography type="text">
+                Precio por equipo: ${mockEventData.pricing.teamPrice}
+                {mockEventData.pricing.teamFee && ` + Fee: $${mockEventData.pricing.teamFee}`}
+              </Typography>
+            )}
+            {mockEventData.pricing.spectatorPrice && (
+              <Typography type="text">
+                Precio espectador: ${mockEventData.pricing.spectatorPrice}
+                {mockEventData.pricing.spectatorFee && ` + Fee: $${mockEventData.pricing.spectatorFee}`}
+              </Typography>
+            )}
+          </Box>
+        </Row>
+
+        <Row>
+          <FormControl fullWidth>
+            <InputLabel id="registration-type-label">Tipo de Registro</InputLabel>
+            <Select
+              labelId="registration-type-label"
+              value={registrationType}
+              label="Tipo de Registro"
+              onChange={handleRegistrationTypeChange}
+            >
+              {mockEventData.registrationTypes.map((type) => (
+                <MenuItem key={type} value={type}>{type}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Row>
 
         <Row justify="center" style={{ marginTop: "2rem" }}>
@@ -93,12 +138,16 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           </Cell>
 
           <Cell xs={4}>
-            <Button variant="filled" onClick={handleRegister} fullWidth>
+            <Button 
+              variant="filled" 
+              onClick={handleRegister} 
+              fullWidth
+              disabled={!registrationType}
+            >
               Inscribirse
             </Button>
           </Cell>
         </Row>
-
       </Card>
     </Container>
   );

@@ -1,15 +1,13 @@
 .button {
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 1rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-width: 110px;
+    gap: 0.5rem;
 }
 
 .button:disabled {
@@ -19,31 +17,32 @@
 
 /* Filled variant */
 .button.filled {
-    background-color: #000;
-    color: #fff;
-    border: 2px solid #000;
+    background-color: #1976d2;
+    color: white;
+    border: none;
 }
 
-.button.filled:hover:not(:disabled) {
-    background-color: #fff;
-    border-color: #000;
-    color: #000;
+.button.filled:hover {
+    background-color: #1565c0;
 }
 
 /* Outlined variant */
 .button.outlined {
     background-color: transparent;
-    color: #000;
-    border: 2px solid #000;
+    color: #1976d2;
+    border: 1px solid #1976d2;
 }
 
-.button.outlined:hover:not(:disabled) {
-    background-color: #000;
-    color: #fff;
-    border: 2px solid #000;
+.button.outlined:hover {
+    background-color: rgba(25, 118, 210, 0.04);
 }
 
 /* Full width modifier */
 .button.full-width {
     width: 100%;
+}
+
+.button-icon {
+    display: flex;
+    align-items: center;
 }

@@ -8,6 +8,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     fullWidth?: boolean;
     children: React.ReactNode;
     className?: string;
+    startIcon?: React.ReactNode;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -15,6 +16,7 @@ const Button: React.FC<ButtonProps> = ({
     fullWidth = false,
     children,
     className = '',
+    startIcon,
     ...props
 }) => {
     return (
@@ -22,6 +24,7 @@ const Button: React.FC<ButtonProps> = ({
             className={`button ${variant} ${fullWidth ? 'full-width' : ''} ${className}`}
             {...props}
         >
+            {startIcon && <span className="button-icon">{startIcon}</span>}
             {children}
         </button>
     );
