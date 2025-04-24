@@ -2,7 +2,6 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
     width: 100%;
     padding: 0 5%;
 }
@@ -17,6 +16,10 @@
 
 .row-justify-center {
     justify-content: center;
+}
+
+.row-justify-left {
+    justify-content: flex-start;
 }
 
 .row-justify-space-between {

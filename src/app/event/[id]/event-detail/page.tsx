@@ -20,7 +20,6 @@ interface EventDetailPageProps {
 
 // Mock data - Replace with actual API call
 const mockEventData = {
-
   pricing: {
     individualPrice: 100,
     individualFee: 10,
@@ -29,7 +28,7 @@ const mockEventData = {
     spectatorPrice: 30,
     spectatorFee: 5,
   },
-  registrationTypes: ['Individual', 'Por grupo', 'Individual y Grupos', 'Espectador']
+  registrationTypes: ['Individual', 'Grupo', 'Espectador']
 };
 
 export default function EventDetailPage({ params }: EventDetailPageProps) {
@@ -70,48 +69,39 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           <ProgressBar />
         </Row>
 
-        <Row>
+        <Row gap={1} style={{ flexDirection: "column" }}>
           <Typography type="subtitle">Descripcion del Evento</Typography>
-        </Row>
-
-        <Row>
           <Typography type="text">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           </Typography>
         </Row>
 
-        <Row>
+        <Row gap={1} style={{ flexDirection: "column" }}>
           <Typography type="subtitle">Ubicación del Evento</Typography>
-        </Row>
-        <Row>
           <Typography type="text">Ciudad de Guatemala</Typography>
         </Row>
 
-        <Row>
+        <Row gap={1} style={{ flexDirection: "column" }}> 
           <Typography type="subtitle">Precios</Typography>
-        </Row>
-        <Row>
-          <Box sx={{ width: '100%' }}>
             {mockEventData.pricing.individualPrice && (
               <Typography type="text">
-                Precio individual: ${mockEventData.pricing.individualPrice}
-                {mockEventData.pricing.individualFee && ` + Fee: $${mockEventData.pricing.individualFee}`}
+                Precio individual: Q{mockEventData.pricing.individualPrice}
+                {mockEventData.pricing.individualFee && ` + Fee: Q${mockEventData.pricing.individualFee}`}
               </Typography>
             )}
             {mockEventData.pricing.teamPrice && (
               <Typography type="text">
-                Precio por equipo: ${mockEventData.pricing.teamPrice}
-                {mockEventData.pricing.teamFee && ` + Fee: $${mockEventData.pricing.teamFee}`}
+                Precio por equipo: Q{mockEventData.pricing.teamPrice}
+                {mockEventData.pricing.teamFee && ` + Fee: Q${mockEventData.pricing.teamFee}`}
               </Typography>
             )}
             {mockEventData.pricing.spectatorPrice && (
               <Typography type="text">
-                Precio espectador: ${mockEventData.pricing.spectatorPrice}
-                {mockEventData.pricing.spectatorFee && ` + Fee: $${mockEventData.pricing.spectatorFee}`}
+                Precio espectador: Q{mockEventData.pricing.spectatorPrice}
+                {mockEventData.pricing.spectatorFee && ` + Fee: Q${mockEventData.pricing.spectatorFee}`}
               </Typography>
             )}
-          </Box>
         </Row>
 
         <Row>

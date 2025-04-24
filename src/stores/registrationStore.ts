@@ -70,10 +70,10 @@ const initialPersonalInfo: PersonalInfo = {
     lastName: '',
     email: '',
     phone: '',
-    phoneCountry: '',
+    phoneCountry: 'GT',
     emergencyContact: '',
     emergencyPhone: '',
-    emergencyPhoneCountry: '',
+    emergencyPhoneCountry: 'GT',
     category: '',
     size: '',
     gender: '',
@@ -156,9 +156,10 @@ export const useRegistrationStore = create<RegistrationState>()(
                     personalInfo: { ...state.personalInfo, ...info },
                 })),
 
-            validateField: (field: keyof PersonalInfo, value: string) =>
+            validateField: (field: string, value: string) =>
                 set((state) => {
                     let error: string | undefined;
+                    console.log("Validating field:", field, "with value:", value);
 
                     switch (field) {
                         case 'email':
@@ -214,6 +215,24 @@ export const useRegistrationStore = create<RegistrationState>()(
                     let error: string | undefined;
 
                     switch (field) {
+                        case 'firstName':
+                            error = validateRequired(value, 'Nombre');
+                            break;
+                        case 'lastName':
+                            error = validateRequired(value, 'Apellido');
+                            break;
+                        case 'emergencyContact':
+                            error = validateRequired(value, 'Contacto de emergencia');
+                            break;
+                        case 'category':
+                            error = validateCategory(value);
+                            break;
+                        case 'size':
+                            error = validateSize(value);
+                            break;
+                        case 'gender':
+                            error = validateRequired(value, 'Sexo');
+                            break;
                         case 'email':
                             error = validateEmail(value);
                             break;

@@ -17,24 +17,27 @@
 
 /* Filled variant */
 .button.filled {
-    background-color: #1976d2;
+    background-color: #000;
     color: white;
     border: none;
 }
 
 .button.filled:hover {
-    background-color: #1565c0;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #000;
 }
 
 /* Outlined variant */
 .button.outlined {
     background-color: transparent;
-    color: #1976d2;
-    border: 1px solid #1976d2;
+    color: #000;
+    border: 1px solid #000;
 }
 
 .button.outlined:hover {
-    background-color: rgba(25, 118, 210, 0.04);
+    background-color: #000;
+    color: white;
 }
 
 /* Full width modifier */
