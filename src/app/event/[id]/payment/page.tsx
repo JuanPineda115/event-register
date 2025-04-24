@@ -29,9 +29,12 @@ import {
     FormHelperText,
     SelectChangeEvent,
     Box,
-    InputAdornment
+    InputAdornment,
+    Alert,
+    Snackbar
 } from '@mui/material';
 import { Icon } from '@systeminfected/react-payment-icons';
+import { useSpectatorStore } from '@/stores/spectatorStore';
 
 interface PaymentPageProps {
     params: Promise<{
@@ -41,12 +44,15 @@ interface PaymentPageProps {
 
 export default function PaymentPage({ params }: PaymentPageProps) {
     const router = useRouter();
-    const { setCurrentStep, personalInfo } = useRegistrationStore();
+    const { setCurrentStep, personalInfo, resetRegistration } = useRegistrationStore();
     const resolvedParams = React.use(params);
-    const { event, isLoading, error, fetchEvent } = eventStore();
+    const { event, isLoading, error: eventError, fetchEvent } = eventStore();
     const { registrationType } = useRegistrationTypeStore();
-    const { paymentInfo, errors, updatePaymentInfo, validateField, validateForm } = usePaymentStore();
+    const { paymentInfo, errors, updatePaymentInfo, validateField, validateForm, resetPayment } = usePaymentStore();
+    const { formatDataForApi: formatSpectatorData, resetSpectator } = useSpectatorStore();
+    const { formatDataForApi: formatGroupData, resetGroupRegistration } = useGroupRegistrationStore();
     const { teamName, contactEmail, teamMembers, formatDataForApi } = useGroupRegistrationStore();
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         setCurrentStep(3);
@@ -77,6 +83,7 @@ export default function PaymentPage({ params }: PaymentPageProps) {
     const handleNext = async () => {
         if (validateForm()) {
             try {
+                setError(null);
                 let registrationData;
 
                 switch (registrationType) {
@@ -113,46 +120,38 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                         break;
 
                     case 'groups':
-                        registrationData = formatDataForApi(parseInt(resolvedParams.id), paymentInfo);
+                        registrationData = formatGroupData(parseInt(resolvedParams.id), paymentInfo);
                         break;
 
                     case 'spectator':
-                        registrationData = {
-                            is_athlete: false,
-                            event_id: parseInt(resolvedParams.id),
-                            quantity: 1,
-                            courtesy_code: '',
-
-                            full_name: `${personalInfo.firstName} ${personalInfo.lastName}`,
-                            email: personalInfo.email,
-                            phone_number: personalInfo.phone,
-
-                            client_first_name: personalInfo.firstName,
-                            client_last_name: personalInfo.lastName,
-                            client_phone: personalInfo.phone,
-                            client_email: personalInfo.email,
-                            client_country: personalInfo.phoneCountry,
-                            client_city: 'Guatemala',
-                            client_state: 'Guatemala',
-                            client_postal_code: '01011',
-                            client_location: 'Zona 1',
-
-                            card_name: paymentInfo.cardHolder,
-                            expiration_month: paymentInfo.expiryMonth,
-                            expiration_year: paymentInfo.expiryYear.slice(-2),
-                            card_number: paymentInfo.cardNumber,
-                            cvv: paymentInfo.cvv,
-
-                            simulate: true
-                        } as spectatorRegistrationRequest;
+                        registrationData = formatSpectatorData(parseInt(resolvedParams.id), paymentInfo);
                         break;
                 }
 
                 await registerForEvent(registrationData);
-                // Handle successful registration (redirect to success page, show confirmation, etc.)
+
+                // Clear all states after successful registration
+                resetPayment();
+                switch (registrationType) {
+                    case 'individual':
+                        resetRegistration();
+                        break;
+                    case 'spectator':
+                        resetSpectator();
+                        break;
+                    case 'groups':
+                        resetGroupRegistration();
+                        break;
+                }
+
+                router.push(`/event/${resolvedParams.id}/payment-success`);
             } catch (error) {
                 console.error('Registration failed:', error);
-                // Handle error (show error message to user)
+                if (error instanceof Error) {
+                    setError(error.message);
+                } else {
+                    setError('Ha ocurrido un error al procesar el pago. Por favor, intenta nuevamente.');
+                }
             }
         }
     };
@@ -183,12 +182,12 @@ export default function PaymentPage({ params }: PaymentPageProps) {
         );
     }
 
-    if (error) {
+    if (eventError) {
         return (
             <Container>
                 <Card className="registration-card">
                     <Row justify="center">
-                        <Typography type="title">Error: {error}</Typography>
+                        <Typography type="title">Error: {eventError}</Typography>
                     </Row>
                 </Card>
             </Container>
@@ -331,6 +330,22 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                         </Cell>
                     </Row>
                 </form>
+
+                <Snackbar
+                    open={!!error}
+                    autoHideDuration={6000}
+                    onClose={() => setError(null)}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert
+                        onClose={() => setError(null)}
+                        severity="error"
+                        variant="filled"
+                        sx={{ width: '100%' }}
+                    >
+                        {error}
+                    </Alert>
+                </Snackbar>
             </Card>
         </Container>
     );
