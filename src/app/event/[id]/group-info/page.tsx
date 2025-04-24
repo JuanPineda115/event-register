@@ -1,19 +1,26 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from "next/navigation";
-import Container from "@/Components/Container/Container";
-import Row from "@/Components/Row/Row";
-import Cell from "@/Components/Cell/Cell";
-import Typography from "@/Components/Typography/Typography";
-import Button from "@/Components/Button/Button";
-import Card from "@/Components/Card/Card";
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Card from '@/Components/Card/Card';
+import Container from '@/Components/Container/Container';
+import Typography from '@/Components/Typography/Typography';
+import Row from '@/Components/Row/Row';
+import Button from '@/Components/Button/Button';
 import ProgressBar from '@/Components/ProgressBar/ProgressBar';
+import Cell from '@/Components/Cell/Cell';
 import { useRegistrationStore } from '@/stores/registrationStore';
 import { useGroupRegistrationStore } from '@/stores/groupRegistrationStore';
-import { TextField, Box, IconButton } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  FormHelperText,
+  SelectChangeEvent,
+  Box
+} from '@mui/material';
 
 interface GroupInfoPageProps {
   params: Promise<{
@@ -21,62 +28,234 @@ interface GroupInfoPageProps {
   }>;
 }
 
+// Definición de países con sus códigos y longitudes de teléfono
+const countries = [
+  { code: 'GT', name: 'GT', phoneCode: '+502', minLength: 8, maxLength: 8 },
+  { code: 'SV', name: 'SV', phoneCode: '+503', minLength: 8, maxLength: 8 },
+  { code: 'HN', name: 'HN', phoneCode: '+504', minLength: 8, maxLength: 8 },
+  { code: 'NI', name: 'NI', phoneCode: '+505', minLength: 8, maxLength: 8 },
+  { code: 'CR', name: 'CR', phoneCode: '+506', minLength: 8, maxLength: 8 },
+  { code: 'PA', name: 'PA', phoneCode: '+507', minLength: 8, maxLength: 8 },
+  { code: 'MX', name: 'MX', phoneCode: '+52', minLength: 10, maxLength: 10 },
+  { code: 'US', name: 'US', phoneCode: '+1', minLength: 10, maxLength: 10 },
+];
+
 export default function GroupInfoPage({ params }: GroupInfoPageProps) {
   const router = useRouter();
   const { setCurrentStep } = useRegistrationStore();
   const {
     teamName,
     teamMembers,
+    formErrors,
     setTeamName,
-    addTeamMember,
-    removeTeamMember,
+    updateTeamMember,
+    validateField,
+    validateForm
   } = useGroupRegistrationStore();
   const resolvedParams = React.use(params);
-
-  const [newMember, setNewMember] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    emergencyContact: '',
-    emergencyPhone: '',
-  });
 
   useEffect(() => {
     setCurrentStep(2);
   }, [setCurrentStep]);
+
+  const handleInputChange = (memberIndex: number, e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
+    const field = e.target.name as keyof typeof teamMembers[0];
+    const value = e.target.value as string;
+
+    updateTeamMember(memberIndex, { [field]: value });
+    validateField(memberIndex, field, value);
+  };
 
   const handleBack = () => {
     router.push(`/event/${resolvedParams.id}/event-detail`);
   };
 
   const handleNext = () => {
-    router.push(`/event/${resolvedParams.id}/payment`);
+    if (validateForm()) {
+      router.push(`/event/${resolvedParams.id}/payment`);
+    }
   };
 
-  const handleAddMember = () => {
-    if (
-      newMember.name &&
-      newMember.email &&
-      newMember.phone &&
-      newMember.emergencyContact &&
-      newMember.emergencyPhone
-    ) {
-      addTeamMember(newMember);
-      setNewMember({
-        name: '',
-        email: '',
-        phone: '',
-        emergencyContact: '',
-        emergencyPhone: '',
-      });
-    }
+  const renderTeamMemberForm = (memberIndex: number) => {
+    const member = teamMembers[memberIndex];
+    const errors = formErrors.teamMembers?.[memberIndex] || {};
+
+    return (
+      <Box key={memberIndex} sx={{ width: '100%', mb: 4 }}>
+        <Typography type="subtitle">
+          Miembro {memberIndex + 1}
+        </Typography>
+        <Row gap={1}>
+          <TextField
+            fullWidth
+            label="Nombre"
+            name="firstName"
+            value={member.firstName}
+            onChange={(e) => handleInputChange(memberIndex, e)}
+            error={!!errors.firstName}
+            helperText={errors.firstName}
+          />
+
+          <TextField
+            fullWidth
+            label="Apellido"
+            name="lastName"
+            value={member.lastName}
+            onChange={(e) => handleInputChange(memberIndex, e)}
+            error={!!errors.lastName}
+            helperText={errors.lastName}
+          />
+
+          <FormControl fullWidth error={!!errors.gender}>
+            <InputLabel id={`gender-label-${memberIndex}`}>Sexo</InputLabel>
+            <Select
+              labelId={`gender-label-${memberIndex}`}
+              name="gender"
+              value={member.gender}
+              onChange={(e) => handleInputChange(memberIndex, e)}
+              label="Sexo"
+            >
+              <MenuItem value="M">Masculino</MenuItem>
+              <MenuItem value="F">Femenino</MenuItem>
+            </Select>
+            {errors.gender && (
+              <FormHelperText>{errors.gender}</FormHelperText>
+            )}
+          </FormControl>
+
+          <TextField
+            fullWidth
+            label="Correo Electrónico"
+            name="email"
+            type="email"
+            value={member.email}
+            onChange={(e) => handleInputChange(memberIndex, e)}
+            error={!!errors.email}
+            helperText={errors.email}
+          />
+
+          {/* Teléfono Personal con Selección de País */}
+          <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+            <Cell xs={6} md={3}>
+              <FormControl fullWidth error={!!errors.phoneCountry}>
+                <InputLabel id={`phone-country-label-${memberIndex}`}>País</InputLabel>
+                <Select
+                  labelId={`phone-country-label-${memberIndex}`}
+                  name="phoneCountry"
+                  value={member.phoneCountry}
+                  onChange={(e) => handleInputChange(memberIndex, e)}
+                  label="País"
+                >
+                  {countries.map((country) => (
+                    <MenuItem key={country.code} value={country.code}>
+                      {country.name} ({country.phoneCode})
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors.phoneCountry && (
+                  <FormHelperText>{errors.phoneCountry}</FormHelperText>
+                )}
+              </FormControl>
+            </Cell>
+            <Cell xs={6} md={9}>
+              <TextField
+                fullWidth
+                label="Teléfono"
+                name="phone"
+                value={member.phone}
+                onChange={(e) => handleInputChange(memberIndex, e)}
+                error={!!errors.phone}
+                helperText={errors.phone}
+                disabled={!member.phoneCountry}
+                placeholder={member.phoneCountry ?
+                  `${countries.find(c => c.code === member.phoneCountry)?.phoneCode || ''} Ingrese su número` :
+                  'Seleccione un país primero'
+                }
+              />
+            </Cell>
+          </div>
+
+          <TextField
+            fullWidth
+            label="Nombre de Contacto de Emergencia"
+            name="emergencyContact"
+            value={member.emergencyContact}
+            onChange={(e) => handleInputChange(memberIndex, e)}
+            error={!!errors.emergencyContact}
+            helperText={errors.emergencyContact}
+          />
+
+          {/* Teléfono de Emergencia con Selección de País */}
+          <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+            <Cell xs={6} md={3}>
+              <FormControl fullWidth error={!!errors.emergencyPhoneCountry}>
+                <InputLabel id={`emergency-phone-country-label-${memberIndex}`}>País</InputLabel>
+                <Select
+                  labelId={`emergency-phone-country-label-${memberIndex}`}
+                  name="emergencyPhoneCountry"
+                  value={member.emergencyPhoneCountry}
+                  onChange={(e) => handleInputChange(memberIndex, e)}
+                  label="País"
+                >
+                  {countries.map((country) => (
+                    <MenuItem key={country.code} value={country.code}>
+                      {country.name} ({country.phoneCode})
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors.emergencyPhoneCountry && (
+                  <FormHelperText>{errors.emergencyPhoneCountry}</FormHelperText>
+                )}
+              </FormControl>
+            </Cell>
+            <Cell xs={6} md={9}>
+              <TextField
+                fullWidth
+                label="Teléfono de Emergencia"
+                name="emergencyPhone"
+                value={member.emergencyPhone}
+                onChange={(e) => handleInputChange(memberIndex, e)}
+                error={!!errors.emergencyPhone}
+                helperText={errors.emergencyPhone}
+                disabled={!member.emergencyPhoneCountry}
+                placeholder={member.emergencyPhoneCountry ?
+                  `${countries.find(c => c.code === member.emergencyPhoneCountry)?.phoneCode || ''} Ingrese su número` :
+                  'Seleccione un país primero'
+                }
+              />
+            </Cell>
+          </div>
+
+          <FormControl fullWidth error={!!errors.size}>
+            <InputLabel id={`size-label-${memberIndex}`}>Talla</InputLabel>
+            <Select
+              labelId={`size-label-${memberIndex}`}
+              name="size"
+              value={member.size}
+              onChange={(e) => handleInputChange(memberIndex, e)}
+              label="Talla"
+            >
+              <MenuItem value="XS">XS</MenuItem>
+              <MenuItem value="S">S</MenuItem>
+              <MenuItem value="M">M</MenuItem>
+              <MenuItem value="L">L</MenuItem>
+              <MenuItem value="XL">XL</MenuItem>
+              <MenuItem value="XXL">XXL</MenuItem>
+            </Select>
+            {errors.size && (
+              <FormHelperText>{errors.size}</FormHelperText>
+            )}
+          </FormControl>
+        </Row>
+      </Box>
+    );
   };
 
   return (
     <Container>
       <Card className="registration-card">
         <Row justify="center">
-          <Typography align="center" type="title">
+          <Typography type="title">
             Información del Equipo
           </Typography>
         </Row>
@@ -85,119 +264,33 @@ export default function GroupInfoPage({ params }: GroupInfoPageProps) {
           <ProgressBar />
         </Row>
 
-        <Row>
-          <TextField
-            fullWidth
-            label="Nombre del Equipo"
-            value={teamName}
-            onChange={(e) => setTeamName(e.target.value)}
-            margin="normal"
-          />
-        </Row>
-
-        <Row>
-          <Typography type="subtitle">Miembros del Equipo</Typography>
-        </Row>
-
-        {teamMembers.map((member, index) => (
-          <Row key={index} style={{ marginTop: '1rem' }}>
-            <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
-              <Typography type="text" style={{ flex: 1 }}>
-                {member.name} - {member.email}
-              </Typography>
-              <IconButton onClick={() => removeTeamMember(index)}>
-                <DeleteIcon />
-              </IconButton>
-            </Box>
-          </Row>
-        ))}
-
-        <Row>
-          <Typography type="subtitle">Agregar Nuevo Miembro</Typography>
-        </Row>
-
-        <Row>
-          <TextField
-            fullWidth
-            label="Nombre"
-            value={newMember.name}
-            onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
-            margin="normal"
-          />
-        </Row>
-
-        <Row>
-          <TextField
-            fullWidth
-            label="Email"
-            value={newMember.email}
-            onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
-            margin="normal"
-          />
-        </Row>
-
-        <Row>
-          <TextField
-            fullWidth
-            label="Teléfono"
-            value={newMember.phone}
-            onChange={(e) => setNewMember({ ...newMember, phone: e.target.value })}
-            margin="normal"
-          />
-        </Row>
-
-        <Row>
-          <TextField
-            fullWidth
-            label="Contacto de Emergencia"
-            value={newMember.emergencyContact}
-            onChange={(e) =>
-              setNewMember({ ...newMember, emergencyContact: e.target.value })
-            }
-            margin="normal"
-          />
-        </Row>
-
-        <Row>
-          <TextField
-            fullWidth
-            label="Teléfono de Emergencia"
-            value={newMember.emergencyPhone}
-            onChange={(e) =>
-              setNewMember({ ...newMember, emergencyPhone: e.target.value })
-            }
-            margin="normal"
-          />
-        </Row>
-
-        <Row justify="center">
-          <Button
-            variant="outlined"
-            onClick={handleAddMember}
-            startIcon={<AddIcon />}
-          >
-            Agregar Miembro
-          </Button>
-        </Row>
-
-        <Row justify="center" style={{ marginTop: "2rem" }}>
-          <Cell xs={4}>
-            <Button variant="outlined" onClick={handleBack} fullWidth>
-              Volver
-            </Button>
-          </Cell>
-
-          <Cell xs={4}>
-            <Button
-              variant="filled"
-              onClick={handleNext}
+        <form onSubmit={(e) => e.preventDefault()} style={{ width: '100%' }}>
+          <Row>
+            <TextField
               fullWidth
-              disabled={!teamName || teamMembers.length === 0}
-            >
-              Continuar
-            </Button>
-          </Cell>
-        </Row>
+              label="Nombre del Equipo"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              error={!!formErrors.teamName}
+              helperText={formErrors.teamName}
+            />
+          </Row>
+
+          {teamMembers.map((_, index) => renderTeamMemberForm(index))}
+
+          <Row justify="center" style={{ marginTop: '2rem' }}>
+            <Cell xs={4}>
+              <Button variant="outlined" onClick={handleBack} fullWidth>
+                Anterior
+              </Button>
+            </Cell>
+            <Cell xs={4}>
+              <Button variant="filled" onClick={handleNext} fullWidth>
+                Siguiente
+              </Button>
+            </Cell>
+          </Row>
+        </form>
       </Card>
     </Container>
   );

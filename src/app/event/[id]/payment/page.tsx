@@ -202,10 +202,7 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                                 endAdornment: (
                                     <InputAdornment position="end">
                                         <Box sx={{ width: 40, height: 25 }}>
-                                            <Icon
-                                                type={paymentInfo.cardType}
-                                                style={{ width: '100%', height: '100%' }}
-                                            />
+                                            
                                         </Box>
                                     </InputAdornment>
                                 ),
