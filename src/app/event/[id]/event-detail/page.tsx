@@ -33,14 +33,19 @@ const mockEventData = {
 
 export default function EventDetailPage({ params }: EventDetailPageProps) {
   const router = useRouter();
-  const { setCurrentStep } = useRegistrationStore();
+  const { setCurrentStep, currentStepIndex } = useRegistrationStore();
   const resolvedParams = React.use(params);
   const [registrationType, setRegistrationType] = useState('');
 
   // Set the current step to 1 (index 1) when this page loads
   useEffect(() => {
+    // If user tries to access this step without completing previous steps
+    if (currentStepIndex < 1) {
+      router.push(`/event/${resolvedParams.id}`);
+      return;
+    }
     setCurrentStep(1);
-  }, [setCurrentStep]);
+  }, [setCurrentStep, currentStepIndex, router, resolvedParams.id]);
 
   const handleBack = () => {
     router.push(`/event/${resolvedParams.id}/`);

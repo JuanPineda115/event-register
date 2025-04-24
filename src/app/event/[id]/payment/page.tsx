@@ -35,7 +35,7 @@ interface FormErrors {
 export default function PaymentPage({ params }: PaymentPageProps) {
     const router = useRouter();
     const resolvedParams = React.use(params);
-    const { setCurrentStep } = useRegistrationStore();
+    const { setCurrentStep, currentStepIndex } = useRegistrationStore();
     
     const [formData, setFormData] = useState<PaymentForm>({
         cardNumber: '',
@@ -48,8 +48,13 @@ export default function PaymentPage({ params }: PaymentPageProps) {
     const [cardType, setCardType] = useState<string>('');
 
     useEffect(() => {
+        // If user tries to access this step without completing previous steps
+        if (currentStepIndex < 3) {
+            router.push(`/event/${resolvedParams.id}/personal-info`);
+            return;
+        }
         setCurrentStep(3);
-    }, [setCurrentStep]);
+    }, [setCurrentStep, currentStepIndex, router, resolvedParams.id]);
 
     // Función para detectar el tipo de tarjeta basado en el número
     const detectCardType = (number: string): string => {

@@ -46,14 +46,20 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
         setCurrentStep,
         validateField,
         validateForm,
-        formErrors = {}
+        formErrors = {},
+        currentStepIndex
     } = useRegistrationStore();
 
     const resolvedParams = React.use(params);
 
     useEffect(() => {
+        // If user tries to access this step without completing previous steps
+        if (currentStepIndex < 2) {
+            router.push(`/event/${resolvedParams.id}/event-detail`);
+            return;
+        }
         setCurrentStep(2);
-    }, [setCurrentStep]);
+    }, [setCurrentStep, currentStepIndex, router, resolvedParams.id]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
         const field = e.target.name as keyof typeof personalInfo;
