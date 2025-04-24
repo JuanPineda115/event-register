@@ -198,15 +198,6 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                             error={!!errors.cardNumber}
                             helperText={errors.cardNumber}
                             placeholder="1234 5678 9012 3456"
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <Box sx={{ width: 40, height: 25 }}>
-                                            
-                                        </Box>
-                                    </InputAdornment>
-                                ),
-                            }}
                         />
 
                         <TextField
