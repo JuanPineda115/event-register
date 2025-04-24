@@ -83,173 +83,171 @@ export default function GroupInfoPage({ params }: GroupInfoPageProps) {
     const errors = formErrors.teamMembers?.[memberIndex] || {};
 
     return (
-      <Box key={memberIndex} sx={{ width: '100%', mb: 4 }}>
-        <Typography type="subtitle">
+      <Row gap={1}>
+        <Typography type="subtitle" style={{ marginTop: '1rem' }}>
           Miembro {memberIndex + 1}
         </Typography>
-        <Row gap={1}>
-          <TextField
-            fullWidth
-            label="Nombre"
-            name="firstName"
-            value={member.firstName}
+        <TextField
+          fullWidth
+          label="Nombre"
+          name="firstName"
+          value={member.firstName}
+          onChange={(e) => handleInputChange(memberIndex, e)}
+          error={!!errors.firstName}
+          helperText={errors.firstName}
+        />
+
+        <TextField
+          fullWidth
+          label="Apellido"
+          name="lastName"
+          value={member.lastName}
+          onChange={(e) => handleInputChange(memberIndex, e)}
+          error={!!errors.lastName}
+          helperText={errors.lastName}
+        />
+
+        <FormControl fullWidth error={!!errors.gender}>
+          <InputLabel id={`gender-label-${memberIndex}`}>Sexo</InputLabel>
+          <Select
+            labelId={`gender-label-${memberIndex}`}
+            name="gender"
+            value={member.gender}
             onChange={(e) => handleInputChange(memberIndex, e)}
-            error={!!errors.firstName}
-            helperText={errors.firstName}
-          />
+            label="Sexo"
+          >
+            <MenuItem value="M">Masculino</MenuItem>
+            <MenuItem value="F">Femenino</MenuItem>
+          </Select>
+          {errors.gender && (
+            <FormHelperText>{errors.gender}</FormHelperText>
+          )}
+        </FormControl>
 
-          <TextField
-            fullWidth
-            label="Apellido"
-            name="lastName"
-            value={member.lastName}
-            onChange={(e) => handleInputChange(memberIndex, e)}
-            error={!!errors.lastName}
-            helperText={errors.lastName}
-          />
+        <TextField
+          fullWidth
+          label="Correo Electrónico"
+          name="email"
+          type="email"
+          value={member.email}
+          onChange={(e) => handleInputChange(memberIndex, e)}
+          error={!!errors.email}
+          helperText={errors.email}
+        />
 
-          <FormControl fullWidth error={!!errors.gender}>
-            <InputLabel id={`gender-label-${memberIndex}`}>Sexo</InputLabel>
-            <Select
-              labelId={`gender-label-${memberIndex}`}
-              name="gender"
-              value={member.gender}
-              onChange={(e) => handleInputChange(memberIndex, e)}
-              label="Sexo"
-            >
-              <MenuItem value="M">Masculino</MenuItem>
-              <MenuItem value="F">Femenino</MenuItem>
-            </Select>
-            {errors.gender && (
-              <FormHelperText>{errors.gender}</FormHelperText>
-            )}
-          </FormControl>
-
-          <TextField
-            fullWidth
-            label="Correo Electrónico"
-            name="email"
-            type="email"
-            value={member.email}
-            onChange={(e) => handleInputChange(memberIndex, e)}
-            error={!!errors.email}
-            helperText={errors.email}
-          />
-
-          {/* Teléfono Personal con Selección de País */}
-          <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-            <Cell xs={6} md={3}>
-              <FormControl fullWidth error={!!errors.phoneCountry}>
-                <InputLabel id={`phone-country-label-${memberIndex}`}>País</InputLabel>
-                <Select
-                  labelId={`phone-country-label-${memberIndex}`}
-                  name="phoneCountry"
-                  value={member.phoneCountry}
-                  onChange={(e) => handleInputChange(memberIndex, e)}
-                  label="País"
-                >
-                  {countries.map((country) => (
-                    <MenuItem key={country.code} value={country.code}>
-                      {country.name} ({country.phoneCode})
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.phoneCountry && (
-                  <FormHelperText>{errors.phoneCountry}</FormHelperText>
-                )}
-              </FormControl>
-            </Cell>
-            <Cell xs={6} md={9}>
-              <TextField
-                fullWidth
-                label="Teléfono"
-                name="phone"
-                value={member.phone}
+        {/* Teléfono Personal con Selección de País */}
+        <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+          <Cell xs={6} md={3}>
+            <FormControl fullWidth error={!!errors.phoneCountry}>
+              <InputLabel id={`phone-country-label-${memberIndex}`}>País</InputLabel>
+              <Select
+                labelId={`phone-country-label-${memberIndex}`}
+                name="phoneCountry"
+                value={member.phoneCountry}
                 onChange={(e) => handleInputChange(memberIndex, e)}
-                error={!!errors.phone}
-                helperText={errors.phone}
-                disabled={!member.phoneCountry}
-                placeholder={member.phoneCountry ?
-                  `${countries.find(c => c.code === member.phoneCountry)?.phoneCode || ''} Ingrese su número` :
-                  'Seleccione un país primero'
-                }
-              />
-            </Cell>
-          </div>
-
-          <TextField
-            fullWidth
-            label="Nombre de Contacto de Emergencia"
-            name="emergencyContact"
-            value={member.emergencyContact}
-            onChange={(e) => handleInputChange(memberIndex, e)}
-            error={!!errors.emergencyContact}
-            helperText={errors.emergencyContact}
-          />
-
-          {/* Teléfono de Emergencia con Selección de País */}
-          <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-            <Cell xs={6} md={3}>
-              <FormControl fullWidth error={!!errors.emergencyPhoneCountry}>
-                <InputLabel id={`emergency-phone-country-label-${memberIndex}`}>País</InputLabel>
-                <Select
-                  labelId={`emergency-phone-country-label-${memberIndex}`}
-                  name="emergencyPhoneCountry"
-                  value={member.emergencyPhoneCountry}
-                  onChange={(e) => handleInputChange(memberIndex, e)}
-                  label="País"
-                >
-                  {countries.map((country) => (
-                    <MenuItem key={country.code} value={country.code}>
-                      {country.name} ({country.phoneCode})
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.emergencyPhoneCountry && (
-                  <FormHelperText>{errors.emergencyPhoneCountry}</FormHelperText>
-                )}
-              </FormControl>
-            </Cell>
-            <Cell xs={6} md={9}>
-              <TextField
-                fullWidth
-                label="Teléfono de Emergencia"
-                name="emergencyPhone"
-                value={member.emergencyPhone}
-                onChange={(e) => handleInputChange(memberIndex, e)}
-                error={!!errors.emergencyPhone}
-                helperText={errors.emergencyPhone}
-                disabled={!member.emergencyPhoneCountry}
-                placeholder={member.emergencyPhoneCountry ?
-                  `${countries.find(c => c.code === member.emergencyPhoneCountry)?.phoneCode || ''} Ingrese su número` :
-                  'Seleccione un país primero'
-                }
-              />
-            </Cell>
-          </div>
-
-          <FormControl fullWidth error={!!errors.size}>
-            <InputLabel id={`size-label-${memberIndex}`}>Talla</InputLabel>
-            <Select
-              labelId={`size-label-${memberIndex}`}
-              name="size"
-              value={member.size}
+                label="País"
+              >
+                {countries.map((country) => (
+                  <MenuItem key={country.code} value={country.code}>
+                    {country.name} ({country.phoneCode})
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.phoneCountry && (
+                <FormHelperText>{errors.phoneCountry}</FormHelperText>
+              )}
+            </FormControl>
+          </Cell>
+          <Cell xs={6} md={9}>
+            <TextField
+              fullWidth
+              label="Teléfono"
+              name="phone"
+              value={member.phone}
               onChange={(e) => handleInputChange(memberIndex, e)}
-              label="Talla"
-            >
-              <MenuItem value="XS">XS</MenuItem>
-              <MenuItem value="S">S</MenuItem>
-              <MenuItem value="M">M</MenuItem>
-              <MenuItem value="L">L</MenuItem>
-              <MenuItem value="XL">XL</MenuItem>
-              <MenuItem value="XXL">XXL</MenuItem>
-            </Select>
-            {errors.size && (
-              <FormHelperText>{errors.size}</FormHelperText>
-            )}
-          </FormControl>
-        </Row>
-      </Box>
+              error={!!errors.phone}
+              helperText={errors.phone}
+              disabled={!member.phoneCountry}
+              placeholder={member.phoneCountry ?
+                `${countries.find(c => c.code === member.phoneCountry)?.phoneCode || ''} Ingrese su número` :
+                'Seleccione un país primero'
+              }
+            />
+          </Cell>
+        </div>
+
+        <TextField
+          fullWidth
+          label="Nombre de Contacto de Emergencia"
+          name="emergencyContact"
+          value={member.emergencyContact}
+          onChange={(e) => handleInputChange(memberIndex, e)}
+          error={!!errors.emergencyContact}
+          helperText={errors.emergencyContact}
+        />
+
+        {/* Teléfono de Emergencia con Selección de País */}
+        <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+          <Cell xs={6} md={3}>
+            <FormControl fullWidth error={!!errors.emergencyPhoneCountry}>
+              <InputLabel id={`emergency-phone-country-label-${memberIndex}`}>País</InputLabel>
+              <Select
+                labelId={`emergency-phone-country-label-${memberIndex}`}
+                name="emergencyPhoneCountry"
+                value={member.emergencyPhoneCountry}
+                onChange={(e) => handleInputChange(memberIndex, e)}
+                label="País"
+              >
+                {countries.map((country) => (
+                  <MenuItem key={country.code} value={country.code}>
+                    {country.name} ({country.phoneCode})
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.emergencyPhoneCountry && (
+                <FormHelperText>{errors.emergencyPhoneCountry}</FormHelperText>
+              )}
+            </FormControl>
+          </Cell>
+          <Cell xs={6} md={9}>
+            <TextField
+              fullWidth
+              label="Teléfono de Emergencia"
+              name="emergencyPhone"
+              value={member.emergencyPhone}
+              onChange={(e) => handleInputChange(memberIndex, e)}
+              error={!!errors.emergencyPhone}
+              helperText={errors.emergencyPhone}
+              disabled={!member.emergencyPhoneCountry}
+              placeholder={member.emergencyPhoneCountry ?
+                `${countries.find(c => c.code === member.emergencyPhoneCountry)?.phoneCode || ''} Ingrese su número` :
+                'Seleccione un país primero'
+              }
+            />
+          </Cell>
+        </div>
+
+        <FormControl fullWidth error={!!errors.size}>
+          <InputLabel id={`size-label-${memberIndex}`}>Talla</InputLabel>
+          <Select
+            labelId={`size-label-${memberIndex}`}
+            name="size"
+            value={member.size}
+            onChange={(e) => handleInputChange(memberIndex, e)}
+            label="Talla"
+          >
+            <MenuItem value="XS">XS</MenuItem>
+            <MenuItem value="S">S</MenuItem>
+            <MenuItem value="M">M</MenuItem>
+            <MenuItem value="L">L</MenuItem>
+            <MenuItem value="XL">XL</MenuItem>
+            <MenuItem value="XXL">XXL</MenuItem>
+          </Select>
+          {errors.size && (
+            <FormHelperText>{errors.size}</FormHelperText>
+          )}
+        </FormControl>
+      </Row>
     );
   };
 
