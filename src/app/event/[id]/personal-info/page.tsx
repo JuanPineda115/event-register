@@ -9,8 +9,8 @@ import Row from '@/Components/Row/Row';
 import Button from '@/Components/Button/Button';
 import ProgressBar from '@/Components/ProgressBar/ProgressBar';
 import Cell from '@/Components/Cell/Cell';
-import { useRegistrationStore } from '@/stores/registrationStore';
-import { useSpectatorStore } from '@/stores/spectatorStore';
+import { useRegistrationStore, FormErrors as AthleteFormErrors, PersonalInfo } from '@/stores/registrationStore';
+import { useSpectatorStore, FormErrors as SpectatorFormErrors, SpectatorInfo } from '@/stores/spectatorStore';
 import { useRegistrationTypeStore } from '@/stores/registrationTypeStore';
 import {
     TextField,
@@ -72,7 +72,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
 
         if (registrationType === 'spectator') {
             updateSpectatorInfo({ [field]: field === 'quantity' ? Number(value) : value });
-            validateSpectatorField(field, value);
+            validateSpectatorField(field as keyof SpectatorInfo, field === 'quantity' ? Number(value) : value as string);
 
             if (field === 'phoneCountry') {
                 const currentPhone = spectatorInfo.phone;
@@ -82,7 +82,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
             }
         } else {
             updatePersonalInfo({ [field]: value });
-            validateAthleteField(field, value as string);
+            validateAthleteField(field as keyof PersonalInfo, value as string);
 
             if (field === 'phoneCountry' || field === 'emergencyPhoneCountry') {
                 const phoneField = field === 'phoneCountry' ? 'phone' : 'emergencyPhone';
@@ -119,6 +119,16 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
 
     const info = registrationType === 'spectator' ? spectatorInfo : personalInfo;
     const errors = registrationType === 'spectator' ? spectatorErrors : athleteErrors;
+
+    // Type guard for athlete errors
+    const isAthleteErrors = (errors: SpectatorFormErrors | AthleteFormErrors): errors is AthleteFormErrors => {
+        return registrationType !== 'spectator';
+    };
+
+    // Type guard for spectator errors
+    const isSpectatorErrors = (errors: SpectatorFormErrors | AthleteFormErrors): errors is SpectatorFormErrors => {
+        return registrationType === 'spectator';
+    };
 
     return (
         <Container>
@@ -161,7 +171,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                             helperText={errors.lastName}
                         />
 
-                        {registrationType !== 'spectator' && (
+                        {registrationType !== 'spectator' && isAthleteErrors(errors) && (
                             <FormControl fullWidth error={!!errors.gender}>
                                 <InputLabel id="gender-label">Sexo</InputLabel>
                                 <Select
@@ -232,7 +242,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                             </Cell>
                         </div>
 
-                        {registrationType === 'spectator' && (
+                        {registrationType === 'spectator' && isSpectatorErrors(errors) && (
                             <TextField
                                 fullWidth
                                 label="Cantidad de Entradas"
@@ -246,7 +256,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                             />
                         )}
 
-                        {registrationType !== 'spectator' && (
+                        {registrationType !== 'spectator' && isAthleteErrors(errors) && (
                             <>
                                 <TextField
                                     fullWidth

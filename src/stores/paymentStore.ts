@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { useRegistrationStore } from './registrationStore';
 import { useGroupRegistrationStore } from './groupRegistrationStore';
-import { PaymentLogoType } from 'react-payment-logos';
 
 export interface PaymentInfo {
   cardNumber: string;
@@ -10,7 +9,7 @@ export interface PaymentInfo {
   expiryMonth: string;
   expiryYear: string;
   cvv: string;
-  cardType: PaymentLogoType;
+  cardType: string;
 }
 
 export interface PaymentErrors {
