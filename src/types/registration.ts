@@ -57,15 +57,22 @@ export interface individualRegistrationRequest {
     simulate: boolean;
 }
 
-export interface groupRegistrationRequest {
-    is_athlete: boolean;
-    event_id: number;
-    quantity: number;
-    courtesy_code: string;
-
+export interface Athlete {
     full_name: string;
     email: string;
     phone_number: string;
+    gender: string;
+    tshirt_size: string;
+}
+
+export interface groupRegistrationRequest {
+    is_athlete: boolean;
+    event_id: number;
+    group_name: string;
+    contact_email: string;
+    courtesy_code: string;
+
+    athletes: Athlete[];
 
     client_first_name: string;
     client_last_name: string;

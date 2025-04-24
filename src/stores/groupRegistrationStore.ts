@@ -16,9 +16,11 @@ interface TeamMember {
 
 interface GroupRegistrationState {
   teamName: string;
+  contactEmail: string;
   teamMembers: TeamMember[];
   formErrors: {
     teamName?: string;
+    contactEmail?: string;
     teamMembers?: {
       [key: number]: {
         firstName?: string;
@@ -35,10 +37,12 @@ interface GroupRegistrationState {
     };
   };
   setTeamName: (name: string) => void;
+  setContactEmail: (email: string) => void;
   updateTeamMember: (index: number, member: Partial<TeamMember>) => void;
   validateField: (memberIndex: number, field: keyof TeamMember, value: string) => void;
   validateForm: () => boolean;
   resetGroupRegistration: () => void;
+  formatDataForApi: (eventId: number, paymentInfo: any) => any;
 }
 
 const initialTeamMember: TeamMember = {
@@ -58,10 +62,13 @@ export const useGroupRegistrationStore = create<GroupRegistrationState>()(
   persist(
     (set, get) => ({
       teamName: '',
+      contactEmail: '',
       teamMembers: [initialTeamMember, initialTeamMember],
       formErrors: {},
 
       setTeamName: (name) => set({ teamName: name }),
+
+      setContactEmail: (email) => set({ contactEmail: email }),
 
       updateTeamMember: (index, member) =>
         set((state) => {
@@ -130,6 +137,13 @@ export const useGroupRegistrationStore = create<GroupRegistrationState>()(
           newErrors.teamName = 'El nombre del equipo es requerido';
         }
 
+        // Validate contact email
+        const emailError = validateEmail(state.contactEmail);
+        if (emailError) {
+          isValid = false;
+          newErrors.contactEmail = emailError;
+        }
+
         // Validate each team member
         state.teamMembers.forEach((member, index) => {
           const memberErrors: { [key: string]: string | undefined } = {};
@@ -186,9 +200,48 @@ export const useGroupRegistrationStore = create<GroupRegistrationState>()(
         return isValid;
       },
 
+      formatDataForApi: (eventId: number, paymentInfo: any) => {
+        const state = get();
+        const firstMember = state.teamMembers[0];
+
+        return {
+          is_athlete: true,
+          event_id: eventId,
+          group_name: state.teamName,
+          contact_email: state.contactEmail,
+
+          athletes: state.teamMembers.map(member => ({
+            full_name: `${member.firstName} ${member.lastName}`,
+            email: member.email,
+            phone_number: member.phone,
+            gender: member.gender,
+            tshirt_size: member.size
+          })),
+
+          client_first_name: firstMember.firstName,
+          client_last_name: firstMember.lastName,
+          client_phone: firstMember.phone,
+          client_email: state.contactEmail,
+          client_country: firstMember.phoneCountry,
+          client_city: "Guatemala",
+          client_state: "Guatemala",
+          client_postal_code: "01010",
+          client_location: "Zona 1",
+
+          card_name: paymentInfo.cardHolder,
+          expiration_month: paymentInfo.expiryMonth,
+          expiration_year: paymentInfo.expiryYear.slice(-2),
+          card_number: paymentInfo.cardNumber,
+          cvv: paymentInfo.cvv,
+
+          simulate: true
+        };
+      },
+
       resetGroupRegistration: () =>
         set({
           teamName: '',
+          contactEmail: '',
           teamMembers: [initialTeamMember, initialTeamMember],
           formErrors: {},
         }),

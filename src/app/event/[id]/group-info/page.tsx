@@ -48,6 +48,8 @@ export default function GroupInfoPage({ params }: GroupInfoPageProps) {
     teamMembers,
     formErrors,
     setTeamName,
+    setContactEmail,
+    contactEmail,
     updateTeamMember,
     validateField,
     validateForm
@@ -265,7 +267,7 @@ export default function GroupInfoPage({ params }: GroupInfoPageProps) {
         </Row>
 
         <form onSubmit={(e) => e.preventDefault()} style={{ width: '100%' }}>
-          <Row>
+          <Row gap={1}>
             <TextField
               fullWidth
               label="Nombre del Equipo"
@@ -274,6 +276,16 @@ export default function GroupInfoPage({ params }: GroupInfoPageProps) {
               error={!!formErrors.teamName}
               helperText={formErrors.teamName}
             />
+
+            <TextField
+              fullWidth
+              label="Correo Electrónico de Contacto"
+              type="email"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+              error={!!formErrors.contactEmail}
+              helperText={formErrors.contactEmail}
+            />
           </Row>
 
           {teamMembers.map((_, index) => renderTeamMemberForm(index))}
@@ -281,7 +293,7 @@ export default function GroupInfoPage({ params }: GroupInfoPageProps) {
           <Row justify="center" style={{ marginTop: '2rem' }}>
             <Cell xs={4}>
               <Button variant="outlined" onClick={handleBack} fullWidth>
-                Anterior
+                Volver
               </Button>
             </Cell>
             <Cell xs={4}>

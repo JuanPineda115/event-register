@@ -12,8 +12,14 @@ import Cell from '@/Components/Cell/Cell';
 import { useRegistrationStore } from '@/stores/registrationStore';
 import { usePaymentStore } from '@/stores/paymentStore';
 import { useRegistrationTypeStore } from '@/stores/registrationTypeStore';
+import { useGroupRegistrationStore } from '@/stores/groupRegistrationStore';
 import eventStore from '@/stores/eventStore';
 import { registerForEvent } from '@/services/registrationService';
+import {
+    individualRegistrationRequest,
+    groupRegistrationRequest,
+    spectatorRegistrationRequest
+} from '@/types/registration';
 import {
     TextField,
     Select,
@@ -40,6 +46,7 @@ export default function PaymentPage({ params }: PaymentPageProps) {
     const { event, isLoading, error, fetchEvent } = eventStore();
     const { registrationType } = useRegistrationTypeStore();
     const { paymentInfo, errors, updatePaymentInfo, validateField, validateForm } = usePaymentStore();
+    const { teamName, contactEmail, teamMembers, formatDataForApi } = useGroupRegistrationStore();
 
     useEffect(() => {
         setCurrentStep(3);
@@ -60,43 +67,89 @@ export default function PaymentPage({ params }: PaymentPageProps) {
     };
 
     const handleBack = () => {
-        router.push(`/event/${resolvedParams.id}/personal-info`);
+        if (registrationType === 'groups') {
+            router.push(`/event/${resolvedParams.id}/group-info`);
+        } else {
+            router.push(`/event/${resolvedParams.id}/personal-info`);
+        }
     };
 
     const handleNext = async () => {
         if (validateForm()) {
             try {
-                const registrationData = {
-                    is_athlete: registrationType === 'individual',
-                    event_id: parseInt(resolvedParams.id),
-                    courtesy_code: '',
+                let registrationData;
 
-                    full_name: `${personalInfo.firstName} ${personalInfo.lastName}`,
-                    email: personalInfo.email,
-                    phone_number: personalInfo.phone,
-                    gender: personalInfo.gender,
-                    tshirt_size: personalInfo.size,
+                switch (registrationType) {
+                    case 'individual':
+                        registrationData = {
+                            is_athlete: true,
+                            event_id: parseInt(resolvedParams.id),
+                            courtesy_code: '',
+                            tshirt_size: personalInfo.size,
+                            gender: personalInfo.gender,
 
-                    client_first_name: personalInfo.firstName,
-                    client_last_name: personalInfo.lastName,
-                    client_phone: personalInfo.phone,
-                    client_email: personalInfo.email,
-                    client_country: personalInfo.phoneCountry,
-                    client_city: 'Guatemala',
-                    client_state: 'Guatemala',
-                    client_postal_code: '01011',
-                    client_location: 'Zona 1',
+                            full_name: `${personalInfo.firstName} ${personalInfo.lastName}`,
+                            email: personalInfo.email,
+                            phone_number: personalInfo.phone,
 
-                    card_name: paymentInfo.cardHolder,
-                    expiration_month: paymentInfo.expiryMonth,
-                    expiration_year: paymentInfo.expiryYear.slice(-2),
-                    card_number: paymentInfo.cardNumber,
-                    cvv: paymentInfo.cvv,
+                            client_first_name: personalInfo.firstName,
+                            client_last_name: personalInfo.lastName,
+                            client_phone: personalInfo.phone,
+                            client_email: personalInfo.email,
+                            client_country: personalInfo.phoneCountry,
+                            client_city: 'Guatemala',
+                            client_state: 'Guatemala',
+                            client_postal_code: '01011',
+                            client_location: 'Zona 1',
 
-                    simulate: true
-                };
+                            card_name: paymentInfo.cardHolder,
+                            expiration_month: paymentInfo.expiryMonth,
+                            expiration_year: paymentInfo.expiryYear.slice(-2),
+                            card_number: paymentInfo.cardNumber,
+                            cvv: paymentInfo.cvv,
+
+                            simulate: true
+                        } as individualRegistrationRequest;
+                        break;
+
+                    case 'groups':
+                        registrationData = formatDataForApi(parseInt(resolvedParams.id), paymentInfo);
+                        break;
+
+                    case 'spectator':
+                        registrationData = {
+                            is_athlete: false,
+                            event_id: parseInt(resolvedParams.id),
+                            quantity: 1,
+                            courtesy_code: '',
+
+                            full_name: `${personalInfo.firstName} ${personalInfo.lastName}`,
+                            email: personalInfo.email,
+                            phone_number: personalInfo.phone,
+
+                            client_first_name: personalInfo.firstName,
+                            client_last_name: personalInfo.lastName,
+                            client_phone: personalInfo.phone,
+                            client_email: personalInfo.email,
+                            client_country: personalInfo.phoneCountry,
+                            client_city: 'Guatemala',
+                            client_state: 'Guatemala',
+                            client_postal_code: '01011',
+                            client_location: 'Zona 1',
+
+                            card_name: paymentInfo.cardHolder,
+                            expiration_month: paymentInfo.expiryMonth,
+                            expiration_year: paymentInfo.expiryYear.slice(-2),
+                            card_number: paymentInfo.cardNumber,
+                            cvv: paymentInfo.cvv,
+
+                            simulate: true
+                        } as spectatorRegistrationRequest;
+                        break;
+                }
 
                 await registerForEvent(registrationData);
+                // Handle successful registration (redirect to success page, show confirmation, etc.)
             } catch (error) {
                 console.error('Registration failed:', error);
                 // Handle error (show error message to user)
