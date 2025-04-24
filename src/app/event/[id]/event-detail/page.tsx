@@ -11,7 +11,7 @@ import Card from "@/Components/Card/Card";
 import ProgressBar from '@/Components/ProgressBar/ProgressBar';
 import { useRegistrationStore } from '@/stores/registrationStore';
 import { Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
-import eventStore from '@/store/eventStore';
+import eventStore from '@/stores/eventStore';
 import { useRegistrationTypeStore } from '@/stores/registrationTypeStore';
 
 interface EventDetailPageProps {

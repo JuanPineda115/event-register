@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/Components/Card/Card';
 import Container from '@/Components/Container/Container';
@@ -12,7 +12,8 @@ import Cell from '@/Components/Cell/Cell';
 import { useRegistrationStore } from '@/stores/registrationStore';
 import { usePaymentStore } from '@/stores/paymentStore';
 import { useRegistrationTypeStore } from '@/stores/registrationTypeStore';
-import eventStore from '@/store/eventStore';
+import eventStore from '@/stores/eventStore';
+import { registerForEvent } from '@/services/registrationService';
 import {
     TextField,
     Select,
@@ -21,8 +22,10 @@ import {
     InputLabel,
     FormHelperText,
     SelectChangeEvent,
-    Box
+    Box,
+    InputAdornment
 } from '@mui/material';
+import { Icon } from '@systeminfected/react-payment-icons';
 
 interface PaymentPageProps {
     params: Promise<{
@@ -32,7 +35,7 @@ interface PaymentPageProps {
 
 export default function PaymentPage({ params }: PaymentPageProps) {
     const router = useRouter();
-    const { setCurrentStep } = useRegistrationStore();
+    const { setCurrentStep, personalInfo } = useRegistrationStore();
     const resolvedParams = React.use(params);
     const { event, isLoading, error, fetchEvent } = eventStore();
     const { registrationType } = useRegistrationTypeStore();
@@ -60,10 +63,46 @@ export default function PaymentPage({ params }: PaymentPageProps) {
         router.push(`/event/${resolvedParams.id}/personal-info`);
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (validateForm()) {
-            // Here you would typically make the payment API call
-            router.push(`/event/${resolvedParams.id}/confirmation`);
+            try {
+                console.log('Payment Info:', personalInfo);
+                const registrationData = {
+                    is_athlete: registrationType === 'individual',
+                    event_id: parseInt(resolvedParams.id),
+                    quantity: 1,
+                    courtesy_code: '',
+
+                    full_name: `${personalInfo.firstName} ${personalInfo.lastName}`,
+                    email: personalInfo.email,
+                    phone_number: personalInfo.phone,
+                    gender: personalInfo.gender,
+                    tshirt_size: personalInfo.size,
+
+                    client_first_name: personalInfo.firstName,
+                    client_last_name: personalInfo.lastName,
+                    client_phone: personalInfo.phone,
+                    client_email: personalInfo.email,
+                    client_country: personalInfo.phoneCountry,
+                    client_city: 'Guatemala',
+                    client_state: 'Guatemala',
+                    client_postal_code: '01011',
+                    client_location: 'Zona 1',
+
+                    card_name: paymentInfo.cardHolder,
+                    expiration_month: paymentInfo.expiryMonth,
+                    expiration_year: paymentInfo.expiryYear.slice(-2),
+                    card_number: paymentInfo.cardNumber,
+                    cvv: paymentInfo.cvv,
+
+                    simulate: true
+                };
+
+                await registerForEvent(registrationData);
+            } catch (error) {
+                console.error('Registration failed:', error);
+                // Handle error (show error message to user)
+            }
         }
     };
 
@@ -129,7 +168,22 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                         Detalle de pago
                     </Typography>
                     <Typography>
-                        Monto a Pagar: Q{amount.toFixed(2)}
+                        Tipo de Registro: {registrationType === 'individual' ? 'Individual' :
+                            registrationType === 'groups' ? 'Grupo' :
+                                'Espectador'}
+                    </Typography>
+                    <Typography>
+                        Precio Base: Q{registrationType === 'individual' ? event.individual_price :
+                            registrationType === 'groups' ? event.group_price :
+                                event.spectator_price}
+                    </Typography>
+                    <Typography>
+                        Cargo por Servicio: Q{registrationType === 'individual' ? event.individual_fee :
+                            registrationType === 'groups' ? event.group_fee :
+                                event.spectator_fee}
+                    </Typography>
+                    <Typography type="subtitle" style={{ marginTop: '1rem' }}>
+                        Total a Pagar: Q{amount.toFixed(2)}
                     </Typography>
                 </Row>
 
@@ -144,6 +198,18 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                             error={!!errors.cardNumber}
                             helperText={errors.cardNumber}
                             placeholder="1234 5678 9012 3456"
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <Box sx={{ width: 40, height: 25 }}>
+                                            <Icon
+                                                type={paymentInfo.cardType}
+                                                style={{ width: '100%', height: '100%' }}
+                                            />
+                                        </Box>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
 
                         <TextField

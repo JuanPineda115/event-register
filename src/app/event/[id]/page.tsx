@@ -8,7 +8,7 @@ import Row from '@/Components/Row/Row';
 import Button from '@/Components/Button/Button';
 import ProgressBar from '@/Components/ProgressBar/ProgressBar';
 import { useRegistrationStore } from '@/stores/registrationStore';
-import eventStore from '@/store/eventStore';
+import eventStore from '@/stores/eventStore';
 
 interface EventPageProps {
     params: Promise<{
@@ -21,7 +21,7 @@ export default function EventPage({ params }: EventPageProps) {
     const { setCurrentStep } = useRegistrationStore();
     const resolvedParams = React.use(params);
     const { event, isLoading, error, fetchEvent } = eventStore();
-    
+
     // Set the current step to 0 (index 0) when this page loads
     useEffect(() => {
         setCurrentStep(0);
@@ -40,7 +40,7 @@ export default function EventPage({ params }: EventPageProps) {
             router.push('/404');
         }
     }, [error, router]);
-    
+
     if (!resolvedParams || isLoading) {
         return (
             <Container>
@@ -74,15 +74,15 @@ export default function EventPage({ params }: EventPageProps) {
             <Card className="registration-card">
                 <Row justify="center" >
                     {event.image_url && (
-                        <img 
-                            src={event.image_url} 
+                        <img
+                            src={event.image_url}
                             alt={event.name}
-                            style={{ 
-                                width: '120px', 
-                                height: '120px', 
+                            style={{
+                                width: '120px',
+                                height: '120px',
                                 borderRadius: '50%',
                                 objectFit: 'cover'
-                            }} 
+                            }}
                         />
                     )}
                 </Row>
@@ -96,13 +96,13 @@ export default function EventPage({ params }: EventPageProps) {
                         {event.description}
                     </Typography>
                 </Row>
-                
+
                 <Row>
                     <ProgressBar />
                 </Row>
 
                 <Row justify="center" style={{ marginTop: '2rem' }}>
-                    <Button 
+                    <Button
                         variant="filled"
                         onClick={() => router.push(`/event/${resolvedParams.id}/event-detail`)}
                     >

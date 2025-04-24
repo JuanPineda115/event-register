@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { useRegistrationStore } from './registrationStore';
 import { useGroupRegistrationStore } from './groupRegistrationStore';
+import { PaymentLogoType } from 'react-payment-logos';
 
 export interface PaymentInfo {
   cardNumber: string;
@@ -9,7 +10,7 @@ export interface PaymentInfo {
   expiryMonth: string;
   expiryYear: string;
   cvv: string;
-  cardType: 'visa' | 'mastercard' | 'amex' | 'unknown';
+  cardType: PaymentLogoType;
 }
 
 export interface PaymentErrors {
@@ -35,7 +36,7 @@ const initialPaymentInfo: PaymentInfo = {
   expiryMonth: '',
   expiryYear: '',
   cvv: '',
-  cardType: 'unknown',
+  cardType: 'visa',
 };
 
 const initialErrors: PaymentErrors = {};
@@ -52,7 +53,7 @@ const validationPatterns = {
 // Card type detection patterns
 const cardPatterns = {
   visa: /^4[0-9]{12}(?:[0-9]{3})?$/,
-  mastercard: /^5[1-5][0-9]{14}$/,
+  mastercard: /^(5[1-5]|2[2-7])[0-9]{14}$/,
   amex: /^3[47][0-9]{13}$/,
 };
 
@@ -61,7 +62,7 @@ const detectCardType = (cardNumber: string): PaymentInfo['cardType'] => {
   if (cardPatterns.visa.test(cleanedNumber)) return 'visa';
   if (cardPatterns.mastercard.test(cleanedNumber)) return 'mastercard';
   if (cardPatterns.amex.test(cleanedNumber)) return 'amex';
-  return 'unknown';
+  return 'visa';
 };
 
 const validateCardNumber = (value: string): string | undefined => {

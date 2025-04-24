@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import eventStore from '../store/eventStore';
+import eventStore from '../stores/eventStore';
 
 const useEvent = () => {
     const router = useRouter();
