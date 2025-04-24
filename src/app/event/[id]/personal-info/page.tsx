@@ -10,6 +10,8 @@ import Button from '@/Components/Button/Button';
 import ProgressBar from '@/Components/ProgressBar/ProgressBar';
 import Cell from '@/Components/Cell/Cell';
 import { useRegistrationStore } from '@/stores/registrationStore';
+import { useSpectatorStore } from '@/stores/spectatorStore';
+import { useRegistrationTypeStore } from '@/stores/registrationTypeStore';
 import {
     TextField,
     Select,
@@ -40,14 +42,23 @@ const countries = [
 
 export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
     const router = useRouter();
+    const { registrationType } = useRegistrationTypeStore();
     const {
         personalInfo,
         updatePersonalInfo,
         setCurrentStep,
-        validateField,
-        validateForm,
-        formErrors = {}
+        validateField: validateAthleteField,
+        validateForm: validateAthleteForm,
+        formErrors: athleteErrors = {}
     } = useRegistrationStore();
+
+    const {
+        spectatorInfo,
+        updateSpectatorInfo,
+        validateField: validateSpectatorField,
+        validateForm: validateSpectatorForm,
+        formErrors: spectatorErrors = {}
+    } = useSpectatorStore();
 
     const resolvedParams = React.use(params);
 
@@ -56,17 +67,29 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
     }, [setCurrentStep]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
-        const field = e.target.name as keyof typeof personalInfo;
-        const value = e.target.value as string;
+        const field = e.target.name as string;
+        const value = e.target.value;
 
-        updatePersonalInfo({ [field]: value });
-        validateField(field, value);
+        if (registrationType === 'spectator') {
+            updateSpectatorInfo({ [field]: field === 'quantity' ? Number(value) : value });
+            validateSpectatorField(field, value);
 
-        if (field === 'phoneCountry' || field === 'emergencyPhoneCountry') {
-            const phoneField = field === 'phoneCountry' ? 'phone' : 'emergencyPhone';
-            const currentPhone = personalInfo[phoneField];
-            if (currentPhone) {
-                validateField(phoneField, currentPhone);
+            if (field === 'phoneCountry') {
+                const currentPhone = spectatorInfo.phone;
+                if (currentPhone) {
+                    validateSpectatorField('phone', currentPhone);
+                }
+            }
+        } else {
+            updatePersonalInfo({ [field]: value });
+            validateAthleteField(field, value as string);
+
+            if (field === 'phoneCountry' || field === 'emergencyPhoneCountry') {
+                const phoneField = field === 'phoneCountry' ? 'phone' : 'emergencyPhone';
+                const currentPhone = personalInfo[phoneField];
+                if (currentPhone) {
+                    validateAthleteField(phoneField, currentPhone);
+                }
             }
         }
     };
@@ -81,11 +104,21 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
     };
 
     const handleNext = () => {
-        console.log(validateForm());
-        if (validateForm()) {
+        const isValid = registrationType === 'spectator'
+            ? validateSpectatorForm()
+            : validateAthleteForm();
+
+        if (isValid) {
             router.push(`/event/${resolvedParams.id}/payment`);
         }
     };
+
+    const handleBack = () => {
+        router.push(`/event/${resolvedParams.id}/event-detail`);
+    };
+
+    const info = registrationType === 'spectator' ? spectatorInfo : personalInfo;
+    const errors = registrationType === 'spectator' ? spectatorErrors : athleteErrors;
 
     return (
         <Container>
@@ -112,59 +145,61 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                             fullWidth
                             label="Nombre"
                             name="firstName"
-                            value={personalInfo.firstName}
+                            value={info.firstName}
                             onChange={handleInputChange}
-                            error={!!formErrors.firstName}
-                            helperText={formErrors.firstName}
+                            error={!!errors.firstName}
+                            helperText={errors.firstName}
                         />
 
                         <TextField
                             fullWidth
                             label="Apellido"
                             name="lastName"
-                            value={personalInfo.lastName}
+                            value={info.lastName}
                             onChange={handleInputChange}
-                            error={!!formErrors.lastName}
-                            helperText={formErrors.lastName}
+                            error={!!errors.lastName}
+                            helperText={errors.lastName}
                         />
 
-                        <FormControl fullWidth error={!!formErrors.gender}>
-                            <InputLabel id="gender-label">Sexo</InputLabel>
-                            <Select
-                                labelId="gender-label"
-                                name="gender"
-                                value={personalInfo.gender}
-                                onChange={handleInputChange}
-                                label="Sexo"
-                            >
-                                <MenuItem value="M">Masculino</MenuItem>
-                                <MenuItem value="F">Femenino</MenuItem>
-                            </Select>
-                            {formErrors.gender && (
-                                <FormHelperText>{formErrors.gender}</FormHelperText>
-                            )}
-                        </FormControl>
+                        {registrationType !== 'spectator' && (
+                            <FormControl fullWidth error={!!errors.gender}>
+                                <InputLabel id="gender-label">Sexo</InputLabel>
+                                <Select
+                                    labelId="gender-label"
+                                    name="gender"
+                                    value={personalInfo.gender}
+                                    onChange={handleInputChange}
+                                    label="Sexo"
+                                >
+                                    <MenuItem value="M">Masculino</MenuItem>
+                                    <MenuItem value="F">Femenino</MenuItem>
+                                </Select>
+                                {errors.gender && (
+                                    <FormHelperText>{errors.gender}</FormHelperText>
+                                )}
+                            </FormControl>
+                        )}
 
                         <TextField
                             fullWidth
                             label="Correo Electrónico"
                             name="email"
                             type="email"
-                            value={personalInfo.email}
+                            value={info.email}
                             onChange={handleInputChange}
-                            error={!!formErrors.email}
-                            helperText={formErrors.email}
+                            error={!!errors.email}
+                            helperText={errors.email}
                         />
 
                         {/* Teléfono Personal con Selección de País */}
                         <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
                             <Cell xs={6} md={3}>
-                                <FormControl fullWidth error={!!formErrors.phoneCountry}>
+                                <FormControl fullWidth error={!!errors.phoneCountry}>
                                     <InputLabel id="phone-country-label">País</InputLabel>
                                     <Select
                                         labelId="phone-country-label"
                                         name="phoneCountry"
-                                        value={personalInfo.phoneCountry}
+                                        value={info.phoneCountry}
                                         onChange={handleInputChange}
                                         label="País"
                                     >
@@ -174,8 +209,8 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                                             </MenuItem>
                                         ))}
                                     </Select>
-                                    {formErrors.phoneCountry && (
-                                        <FormHelperText>{formErrors.phoneCountry}</FormHelperText>
+                                    {errors.phoneCountry && (
+                                        <FormHelperText>{errors.phoneCountry}</FormHelperText>
                                     )}
                                 </FormControl>
                             </Cell>
@@ -184,96 +219,114 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                                     fullWidth
                                     label="Teléfono"
                                     name="phone"
-                                    value={personalInfo.phone}
+                                    value={info.phone}
                                     onChange={handleInputChange}
-                                    error={!!formErrors.phone}
-                                    helperText={formErrors.phone}
-                                    disabled={!personalInfo.phoneCountry}
-                                    placeholder={personalInfo.phoneCountry ?
-                                        `${getPhoneValidation(personalInfo.phoneCountry)?.phoneCode || ''} Ingrese su número` :
+                                    error={!!errors.phone}
+                                    helperText={errors.phone}
+                                    disabled={!info.phoneCountry}
+                                    placeholder={info.phoneCountry ?
+                                        `${getPhoneValidation(info.phoneCountry)?.phoneCode || ''} Ingrese su número` :
                                         'Seleccione un país primero'
                                     }
                                 />
                             </Cell>
                         </div>
 
-                        <TextField
-                            fullWidth
-                            label="Nombre de Contacto de Emergencia"
-                            name="emergencyContact"
-                            value={personalInfo.emergencyContact}
-                            onChange={handleInputChange}
-                            error={!!formErrors.emergencyContact}
-                            helperText={formErrors.emergencyContact}
-                        />
+                        {registrationType === 'spectator' && (
+                            <TextField
+                                fullWidth
+                                label="Cantidad de Entradas"
+                                name="quantity"
+                                type="number"
+                                value={spectatorInfo.quantity}
+                                onChange={handleInputChange}
+                                error={!!errors.quantity}
+                                helperText={errors.quantity}
+                                inputProps={{ min: 1, max: 10 }}
+                            />
+                        )}
 
-                        {/* Teléfono de Emergencia con Selección de País */}
-                        <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-                            <Cell xs={6} md={3}>
-                                <FormControl fullWidth error={!!formErrors.emergencyPhoneCountry}>
-                                    <InputLabel id="emergency-phone-country-label">País</InputLabel>
-                                    <Select
-                                        labelId="emergency-phone-country-label"
-                                        name="emergencyPhoneCountry"
-                                        value={personalInfo.emergencyPhoneCountry}
-                                        onChange={handleInputChange}
-                                        label="País"
-                                    >
-                                        {countries.map((country) => (
-                                            <MenuItem key={country.code} value={country.code}>
-                                                {country.name} ({country.phoneCode})
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                    {formErrors.emergencyPhoneCountry && (
-                                        <FormHelperText>{formErrors.emergencyPhoneCountry}</FormHelperText>
-                                    )}
-                                </FormControl>
-                            </Cell>
-                            <Cell xs={6} md={9}>
+                        {registrationType !== 'spectator' && (
+                            <>
                                 <TextField
                                     fullWidth
-                                    label="Teléfono de Emergencia"
-                                    name="emergencyPhone"
-                                    value={personalInfo.emergencyPhone}
+                                    label="Nombre de Contacto de Emergencia"
+                                    name="emergencyContact"
+                                    value={personalInfo.emergencyContact}
                                     onChange={handleInputChange}
-                                    error={!!formErrors.emergencyPhone}
-                                    helperText={formErrors.emergencyPhone}
-                                    disabled={!personalInfo.emergencyPhoneCountry}
-                                    placeholder={personalInfo.emergencyPhoneCountry ?
-                                        `${getPhoneValidation(personalInfo.emergencyPhoneCountry)?.phoneCode || ''} Ingrese su número` :
-                                        'Seleccione un país primero'
-                                    }
+                                    error={!!errors.emergencyContact}
+                                    helperText={errors.emergencyContact}
                                 />
-                            </Cell>
-                        </div>
 
-                        <FormControl fullWidth error={!!formErrors.size}>
-                            <InputLabel id="size-label">Talla</InputLabel>
-                            <Select
-                                labelId="size-label"
-                                name="size"
-                                value={personalInfo.size}
-                                onChange={handleInputChange}
-                                label="Talla"
-                            >
-                                <MenuItem value="XS">XS</MenuItem>
-                                <MenuItem value="S">S</MenuItem>
-                                <MenuItem value="M">M</MenuItem>
-                                <MenuItem value="L">L</MenuItem>
-                                <MenuItem value="XL">XL</MenuItem>
-                                <MenuItem value="XXL">XXL</MenuItem>
-                            </Select>
-                            {formErrors.size && (
-                                <FormHelperText>{formErrors.size}</FormHelperText>
-                            )}
-                        </FormControl>
+                                {/* Teléfono de Emergencia con Selección de País */}
+                                <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+                                    <Cell xs={6} md={3}>
+                                        <FormControl fullWidth error={!!errors.emergencyPhoneCountry}>
+                                            <InputLabel id="emergency-phone-country-label">País</InputLabel>
+                                            <Select
+                                                labelId="emergency-phone-country-label"
+                                                name="emergencyPhoneCountry"
+                                                value={personalInfo.emergencyPhoneCountry}
+                                                onChange={handleInputChange}
+                                                label="País"
+                                            >
+                                                {countries.map((country) => (
+                                                    <MenuItem key={country.code} value={country.code}>
+                                                        {country.name} ({country.phoneCode})
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                            {errors.emergencyPhoneCountry && (
+                                                <FormHelperText>{errors.emergencyPhoneCountry}</FormHelperText>
+                                            )}
+                                        </FormControl>
+                                    </Cell>
+                                    <Cell xs={6} md={9}>
+                                        <TextField
+                                            fullWidth
+                                            label="Teléfono de Emergencia"
+                                            name="emergencyPhone"
+                                            value={personalInfo.emergencyPhone}
+                                            onChange={handleInputChange}
+                                            error={!!errors.emergencyPhone}
+                                            helperText={errors.emergencyPhone}
+                                            disabled={!personalInfo.emergencyPhoneCountry}
+                                            placeholder={personalInfo.emergencyPhoneCountry ?
+                                                `${getPhoneValidation(personalInfo.emergencyPhoneCountry)?.phoneCode || ''} Ingrese su número` :
+                                                'Seleccione un país primero'
+                                            }
+                                        />
+                                    </Cell>
+                                </div>
+
+                                <FormControl fullWidth error={!!errors.size}>
+                                    <InputLabel id="size-label">Talla</InputLabel>
+                                    <Select
+                                        labelId="size-label"
+                                        name="size"
+                                        value={personalInfo.size}
+                                        onChange={handleInputChange}
+                                        label="Talla"
+                                    >
+                                        <MenuItem value="XS">XS</MenuItem>
+                                        <MenuItem value="S">S</MenuItem>
+                                        <MenuItem value="M">M</MenuItem>
+                                        <MenuItem value="L">L</MenuItem>
+                                        <MenuItem value="XL">XL</MenuItem>
+                                        <MenuItem value="XXL">XXL</MenuItem>
+                                    </Select>
+                                    {errors.size && (
+                                        <FormHelperText>{errors.size}</FormHelperText>
+                                    )}
+                                </FormControl>
+                            </>
+                        )}
                     </Row>
 
                     <Row justify="center" style={{ marginTop: '2rem' }}>
                         <Cell xs={4}>
-                            <Button variant="outlined" onClick={() => router.push(`/event/${resolvedParams.id}/event-detail`)} fullWidth>
-                                Anterior
+                            <Button variant="outlined" onClick={handleBack} fullWidth>
+                                Volver
                             </Button>
                         </Cell>
                         <Cell xs={4}>
