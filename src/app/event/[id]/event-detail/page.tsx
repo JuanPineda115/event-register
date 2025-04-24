@@ -12,18 +12,7 @@ import ProgressBar from '@/Components/ProgressBar/ProgressBar';
 import { useRegistrationStore } from '@/stores/registrationStore';
 import { Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
 import eventStore from '@/store/eventStore';
-import { create } from 'zustand';
-
-// Create a store for registration type
-interface RegistrationTypeState {
-  registrationType: string;
-  setRegistrationType: (type: string) => void;
-}
-
-export const useRegistrationTypeStore = create<RegistrationTypeState>((set) => ({
-  registrationType: '',
-  setRegistrationType: (type) => set({ registrationType: type }),
-}));
+import { useRegistrationTypeStore } from '@/stores/registrationTypeStore';
 
 interface EventDetailPageProps {
   params: Promise<{

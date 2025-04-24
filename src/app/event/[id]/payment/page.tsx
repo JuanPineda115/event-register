@@ -11,7 +11,7 @@ import ProgressBar from '@/Components/ProgressBar/ProgressBar';
 import Cell from '@/Components/Cell/Cell';
 import { useRegistrationStore } from '@/stores/registrationStore';
 import { usePaymentStore } from '@/stores/paymentStore';
-import { useRegistrationTypeStore } from '@/app/event/[id]/event-detail/page';
+import { useRegistrationTypeStore } from '@/stores/registrationTypeStore';
 import eventStore from '@/store/eventStore';
 import {
     TextField,
