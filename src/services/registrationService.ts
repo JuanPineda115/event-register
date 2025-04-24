@@ -1,10 +1,15 @@
-import { RegistrationRequest } from '../types/registration';
+import {
+    spectatorRegistrationRequest,
+    individualRegistrationRequest,
+    groupRegistrationRequest
+} from '../types/registration';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN;
 
-export const registerForEvent = async (data: RegistrationRequest) => {
+export const registerForEvent = async (data: spectatorRegistrationRequest |
+    individualRegistrationRequest | groupRegistrationRequest) => {
     try {
         const response = await axios.post(`${API_BASE_URL}/register/`, data, {
             headers: {

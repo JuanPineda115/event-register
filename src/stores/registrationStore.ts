@@ -91,9 +91,6 @@ const validateEmail = (email: string): string | undefined => {
 const phoneValidationRules: { [key: string]: { pattern: RegExp, length: number } } = {
     'CR': { pattern: /^\d+$/, length: 8 },
     'GT': { pattern: /^\d+$/, length: 8 },
-    'US': { pattern: /^\d+$/, length: 10 },
-    'MX': { pattern: /^\d+$/, length: 10 },
-    // Add more countries as needed
 };
 
 const validatePhone = (phone: string, country: string): string | undefined => {

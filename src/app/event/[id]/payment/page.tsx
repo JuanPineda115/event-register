@@ -66,11 +66,9 @@ export default function PaymentPage({ params }: PaymentPageProps) {
     const handleNext = async () => {
         if (validateForm()) {
             try {
-                console.log('Payment Info:', personalInfo);
                 const registrationData = {
                     is_athlete: registrationType === 'individual',
                     event_id: parseInt(resolvedParams.id),
-                    quantity: 1,
                     courtesy_code: '',
 
                     full_name: `${personalInfo.firstName} ${personalInfo.lastName}`,
