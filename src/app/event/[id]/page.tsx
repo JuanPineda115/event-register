@@ -8,6 +8,7 @@ import Row from '@/Components/Row/Row';
 import Button from '@/Components/Button/Button';
 import ProgressBar from '@/Components/ProgressBar/ProgressBar';
 import { useRegistrationStore } from '@/stores/registrationStore';
+import eventStore from '@/store/eventStore';
 
 interface EventPageProps {
     params: Promise<{
@@ -19,41 +20,80 @@ export default function EventPage({ params }: EventPageProps) {
     const router = useRouter();
     const { setCurrentStep } = useRegistrationStore();
     const resolvedParams = React.use(params);
+    const { event, isLoading, error, fetchEvent } = eventStore();
     
     // Set the current step to 0 (index 0) when this page loads
     useEffect(() => {
         setCurrentStep(0);
     }, [setCurrentStep]);
+
+    // Fetch event data when component mounts
+    useEffect(() => {
+        if (resolvedParams?.id) {
+            fetchEvent(resolvedParams.id);
+        }
+    }, [resolvedParams?.id, fetchEvent]);
+
+    // Handle 404 redirect
+    useEffect(() => {
+        if (error === 'Event not found') {
+            router.push('/404');
+        }
+    }, [error, router]);
     
-    if (!resolvedParams) {
-        return null;
+    if (!resolvedParams || isLoading) {
+        return (
+            <Container>
+                <Card className="registration-card">
+                    <Row justify="center">
+                        <Typography type="title">Cargando...</Typography>
+                    </Row>
+                </Card>
+            </Container>
+        );
     }
 
-    // In a real application, you would fetch event data based on the ID
-    const eventData = {
-        title: `Event ${resolvedParams.id}`,
-        description: 'Registro de evento deportivo',
-        imageUrl: '/event-placeholder.jpg', // You'll need to add this image to your public folder
-    };
+    if (error) {
+        return (
+            <Container>
+                <Card className="registration-card">
+                    <Row justify="center">
+                        <Typography type="title">Error: {error}</Typography>
+                    </Row>
+                </Card>
+            </Container>
+        );
+    }
+
+    if (!event) {
+        return null;
+    }
 
     return (
         <Container>
             <Card className="registration-card">
                 <Row justify="center" >
-                    <img 
-                        src={eventData.imageUrl} 
-                        alt={eventData.title}
-                        style={{ 
-                            width: '120px', 
-                            height: '120px', 
-                            borderRadius: '50%',
-                            objectFit: 'cover'
-                        }} 
-                    />
+                    {event.image_url && (
+                        <img 
+                            src={event.image_url} 
+                            alt={event.name}
+                            style={{ 
+                                width: '120px', 
+                                height: '120px', 
+                                borderRadius: '50%',
+                                objectFit: 'cover'
+                            }} 
+                        />
+                    )}
                 </Row>
                 <Row justify="center" >
                     <Typography type="title">
-                        {eventData.description}
+                        {event.name}
+                    </Typography>
+                </Row>
+                <Row justify="center" >
+                    <Typography type="text">
+                        {event.description}
                     </Typography>
                 </Row>
                 
@@ -61,7 +101,7 @@ export default function EventPage({ params }: EventPageProps) {
                     <ProgressBar />
                 </Row>
 
-                <Row justify="center"  style={{ marginTop: '2rem' }}>
+                <Row justify="center" style={{ marginTop: '2rem' }}>
                     <Button 
                         variant="filled"
                         onClick={() => router.push(`/event/${resolvedParams.id}/event-detail`)}

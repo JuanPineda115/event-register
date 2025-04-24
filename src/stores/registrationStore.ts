@@ -18,7 +18,6 @@ export interface PersonalInfo {
     emergencyContact: string;
     emergencyPhone: string;
     emergencyPhoneCountry: string;
-    category: string;
     size: string;
     gender: string;
 }
@@ -33,7 +32,6 @@ export interface FormErrors {
     emergencyContact?: string;
     emergencyPhone?: string;
     emergencyPhoneCountry?: string;
-    category?: string;
     size?: string;
     gender?: string;
 }
@@ -74,7 +72,6 @@ const initialPersonalInfo: PersonalInfo = {
     emergencyContact: '',
     emergencyPhone: '',
     emergencyPhoneCountry: 'GT',
-    category: '',
     size: '',
     gender: '',
 };
@@ -102,23 +99,19 @@ const phoneValidationRules: { [key: string]: { pattern: RegExp, length: number }
 const validatePhone = (phone: string, country: string): string | undefined => {
     if (!country) return 'Debe seleccionar un país';
     if (!phone) return 'El teléfono es requerido';
-    
+
     const rules = phoneValidationRules[country];
     if (!rules) return 'País no soportado';
-    
+
     if (!rules.pattern.test(phone)) return 'El teléfono solo debe contener dígitos';
     if (phone.length !== rules.length) return `El teléfono debe tener ${rules.length} dígitos para ${country}`;
-    
+
     return undefined;
 };
 
 const validateRequired = (value: string, fieldName: string): string | undefined => {
     if (!value) return `${fieldName} es requerido`;
     return undefined;
-};
-
-const validateCategory = (category: string): string | undefined => {
-    if (!category) return 'La categoría es requerida';
 };
 
 const validateSize = (size: string): string | undefined => {
@@ -159,7 +152,6 @@ export const useRegistrationStore = create<RegistrationState>()(
             validateField: (field: string, value: string) =>
                 set((state) => {
                     let error: string | undefined;
-                    console.log("Validating field:", field, "with value:", value);
 
                     switch (field) {
                         case 'email':
@@ -183,9 +175,6 @@ export const useRegistrationStore = create<RegistrationState>()(
                             break;
                         case 'emergencyContact':
                             error = validateRequired(value, 'Contacto de emergencia');
-                            break;
-                        case 'category':
-                            error = validateCategory(value);
                             break;
                         case 'size':
                             error = validateSize(value);
@@ -224,9 +213,6 @@ export const useRegistrationStore = create<RegistrationState>()(
                         case 'emergencyContact':
                             error = validateRequired(value, 'Contacto de emergencia');
                             break;
-                        case 'category':
-                            error = validateCategory(value);
-                            break;
                         case 'size':
                             error = validateSize(value);
                             break;
@@ -251,6 +237,7 @@ export const useRegistrationStore = create<RegistrationState>()(
                     }
 
                     if (error) {
+                        console.log(`Error in ${field}: ${error}`); // Log the error
                         isValid = false;
                         newErrors[field as keyof FormErrors] = error;
                     }

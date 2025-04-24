@@ -23,7 +23,7 @@ interface GroupInfoPageProps {
 
 export default function GroupInfoPage({ params }: GroupInfoPageProps) {
   const router = useRouter();
-  const { setCurrentStep, currentStepIndex } = useRegistrationStore();
+  const { setCurrentStep } = useRegistrationStore();
   const {
     teamName,
     teamMembers,
@@ -42,12 +42,8 @@ export default function GroupInfoPage({ params }: GroupInfoPageProps) {
   });
 
   useEffect(() => {
-    if (currentStepIndex < 2) {
-      router.push(`/event/${resolvedParams.id}/event-detail`);
-      return;
-    }
     setCurrentStep(2);
-  }, [setCurrentStep, currentStepIndex, router, resolvedParams.id]);
+  }, [setCurrentStep]);
 
   const handleBack = () => {
     router.push(`/event/${resolvedParams.id}/event-detail`);

@@ -11,6 +11,19 @@ import Card from "@/Components/Card/Card";
 import ProgressBar from '@/Components/ProgressBar/ProgressBar';
 import { useRegistrationStore } from '@/stores/registrationStore';
 import { Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
+import eventStore from '@/store/eventStore';
+import { create } from 'zustand';
+
+// Create a store for registration type
+interface RegistrationTypeState {
+  registrationType: string;
+  setRegistrationType: (type: string) => void;
+}
+
+export const useRegistrationTypeStore = create<RegistrationTypeState>((set) => ({
+  registrationType: '',
+  setRegistrationType: (type) => set({ registrationType: type }),
+}));
 
 interface EventDetailPageProps {
   params: Promise<{
@@ -18,41 +31,38 @@ interface EventDetailPageProps {
   }>;
 }
 
-// Mock data - Replace with actual API call
-const mockEventData = {
-  pricing: {
-    individualPrice: 100,
-    individualFee: 10,
-    teamPrice: 500,
-    teamFee: 50,
-    spectatorPrice: 30,
-    spectatorFee: 5,
-  },
-  registrationTypes: ['Individual', 'Grupo', 'Espectador']
-};
-
 export default function EventDetailPage({ params }: EventDetailPageProps) {
   const router = useRouter();
-  const { setCurrentStep, currentStepIndex } = useRegistrationStore();
+  const { setCurrentStep } = useRegistrationStore();
   const resolvedParams = React.use(params);
-  const [registrationType, setRegistrationType] = useState('');
+  const { registrationType, setRegistrationType } = useRegistrationTypeStore();
+  const { event, isLoading, error, fetchEvent } = eventStore();
 
   // Set the current step to 1 (index 1) when this page loads
   useEffect(() => {
-    // If user tries to access this step without completing previous steps
-    if (currentStepIndex < 1) {
-      router.push(`/event/${resolvedParams.id}`);
-      return;
-    }
     setCurrentStep(1);
-  }, [setCurrentStep, currentStepIndex, router, resolvedParams.id]);
+  }, [setCurrentStep]);
+
+  // Fetch event data when component mounts
+  useEffect(() => {
+    if (resolvedParams?.id) {
+      fetchEvent(resolvedParams.id);
+    }
+  }, [resolvedParams?.id, fetchEvent]);
+
+  // Handle 404 redirect
+  useEffect(() => {
+    if (error === 'Event not found') {
+      router.push('/404');
+    }
+  }, [error, router]);
 
   const handleBack = () => {
     router.push(`/event/${resolvedParams.id}/`);
   };
 
   const handleRegister = () => {
-    if (registrationType === 'Por grupo' || registrationType === 'Individual y Grupos') {
+    if (registrationType === 'groups') {
       router.push(`/event/${resolvedParams.id}/group-info`);
     } else {
       router.push(`/event/${resolvedParams.id}/personal-info`);
@@ -60,8 +70,47 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   };
 
   const handleRegistrationTypeChange = (event: any) => {
-    setRegistrationType(event.target.value);
+    const newType = event.target.value;
+    setRegistrationType(newType);
   };
+
+  // Helper function to translate registration types
+  const translateRegistrationType = (type: string) => {
+    const translations: { [key: string]: string } = {
+      'individual': 'Individual',
+      'groups': 'Grupal',
+      'individual and groups': 'Individual y Grupal'
+    };
+    return translations[type.toLowerCase()] || type;
+  };
+
+  if (!resolvedParams || isLoading) {
+    return (
+      <Container>
+        <Card className="registration-card">
+          <Row justify="center">
+            <Typography type="title">Cargando...</Typography>
+          </Row>
+        </Card>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <Card className="registration-card">
+          <Row justify="center">
+            <Typography type="title">Error: {error}</Typography>
+          </Row>
+        </Card>
+      </Container>
+    );
+  }
+
+  if (!event) {
+    return null;
+  }
 
   return (
     <Container>
@@ -77,36 +126,35 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
         <Row gap={1} style={{ flexDirection: "column" }}>
           <Typography type="subtitle">Descripcion del Evento</Typography>
           <Typography type="text">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            {event.description}
           </Typography>
         </Row>
 
         <Row gap={1} style={{ flexDirection: "column" }}>
           <Typography type="subtitle">Ubicación del Evento</Typography>
-          <Typography type="text">Ciudad de Guatemala</Typography>
+          <Typography type="text">{event.location}</Typography>
         </Row>
 
-        <Row gap={1} style={{ flexDirection: "column" }}> 
+        <Row gap={1} style={{ flexDirection: "column" }}>
           <Typography type="subtitle">Precios</Typography>
-            {mockEventData.pricing.individualPrice && (
-              <Typography type="text">
-                Precio individual: Q{mockEventData.pricing.individualPrice}
-                {mockEventData.pricing.individualFee && ` + Fee: Q${mockEventData.pricing.individualFee}`}
-              </Typography>
-            )}
-            {mockEventData.pricing.teamPrice && (
-              <Typography type="text">
-                Precio por equipo: Q{mockEventData.pricing.teamPrice}
-                {mockEventData.pricing.teamFee && ` + Fee: Q${mockEventData.pricing.teamFee}`}
-              </Typography>
-            )}
-            {mockEventData.pricing.spectatorPrice && (
-              <Typography type="text">
-                Precio espectador: Q{mockEventData.pricing.spectatorPrice}
-                {mockEventData.pricing.spectatorFee && ` + Fee: Q${mockEventData.pricing.spectatorFee}`}
-              </Typography>
-            )}
+          {event.individual_price && (
+            <Typography type="text">
+              Precio individual: Q{event.individual_price}
+              {event.individual_fee && ` + Fee: Q${event.individual_fee}`}
+            </Typography>
+          )}
+          {event.group_price && (
+            <Typography type="text">
+              Precio por equipo: Q{event.group_price}
+              {event.group_fee && ` + Fee: Q${event.group_fee}`}
+            </Typography>
+          )}
+          {event.spectator_price && (
+            <Typography type="text">
+              Precio espectador: Q{event.spectator_price}
+              {event.spectator_fee && ` + Fee: Q${event.spectator_fee}`}
+            </Typography>
+          )}
         </Row>
 
         <Row>
@@ -118,9 +166,10 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               label="Tipo de Registro"
               onChange={handleRegistrationTypeChange}
             >
-              {mockEventData.registrationTypes.map((type) => (
-                <MenuItem key={type} value={type}>{type}</MenuItem>
+              {event.registration_type.split(' and ').map((type) => (
+                <MenuItem key={type} value={type}>{translateRegistrationType(type)}</MenuItem>
               ))}
+              <MenuItem value="spectator">Espectador</MenuItem>
             </Select>
           </FormControl>
         </Row>
@@ -133,9 +182,9 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           </Cell>
 
           <Cell xs={4}>
-            <Button 
-              variant="filled" 
-              onClick={handleRegister} 
+            <Button
+              variant="filled"
+              onClick={handleRegister}
               fullWidth
               disabled={!registrationType}
             >

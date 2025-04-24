@@ -1,16 +1,28 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/Components/Card/Card';
 import Container from '@/Components/Container/Container';
 import Typography from '@/Components/Typography/Typography';
 import Row from '@/Components/Row/Row';
-import Cell from '@/Components/Cell/Cell';
 import Button from '@/Components/Button/Button';
 import ProgressBar from '@/Components/ProgressBar/ProgressBar';
-import { TextField } from '@mui/material';
+import Cell from '@/Components/Cell/Cell';
 import { useRegistrationStore } from '@/stores/registrationStore';
+import { usePaymentStore } from '@/stores/paymentStore';
+import { useRegistrationTypeStore } from '@/app/event/[id]/event-detail/page';
+import eventStore from '@/store/eventStore';
+import {
+    TextField,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    FormHelperText,
+    SelectChangeEvent,
+    Box
+} from '@mui/material';
 
 interface PaymentPageProps {
     params: Promise<{
@@ -18,283 +30,197 @@ interface PaymentPageProps {
     }>;
 }
 
-interface PaymentForm {
-    cardNumber: string;
-    cardHolder: string;
-    expiryDate: string;
-    cvv: string;
-}
-
-interface FormErrors {
-    cardNumber?: string;
-    cardHolder?: string;
-    expiryDate?: string;
-    cvv?: string;
-}
-
 export default function PaymentPage({ params }: PaymentPageProps) {
     const router = useRouter();
+    const { setCurrentStep } = useRegistrationStore();
     const resolvedParams = React.use(params);
-    const { setCurrentStep, currentStepIndex } = useRegistrationStore();
-    
-    const [formData, setFormData] = useState<PaymentForm>({
-        cardNumber: '',
-        cardHolder: '',
-        expiryDate: '',
-        cvv: ''
-    });
-
-    const [errors, setErrors] = useState<FormErrors>({});
-    const [cardType, setCardType] = useState<string>('');
+    const { event, isLoading, error, fetchEvent } = eventStore();
+    const { registrationType } = useRegistrationTypeStore();
+    const { paymentInfo, errors, updatePaymentInfo, validateField, validateForm } = usePaymentStore();
 
     useEffect(() => {
-        // If user tries to access this step without completing previous steps
-        if (currentStepIndex < 3) {
-            router.push(`/event/${resolvedParams.id}/personal-info`);
-            return;
-        }
         setCurrentStep(3);
-    }, [setCurrentStep, currentStepIndex, router, resolvedParams.id]);
+    }, [setCurrentStep]);
 
-    // Función para detectar el tipo de tarjeta basado en el número
-    const detectCardType = (number: string): string => {
-        const cleanNumber = number.replace(/\s+/g, '');
-        
-        // Patrones de tarjetas según OWASP
-        const patterns = {
-            visa: /^4[0-9]{12}(?:[0-9]{3})?$/,
-            mastercard: /^5[1-5][0-9]{14}$/,
-            amex: /^3[47][0-9]{13}$/,
-        };
+    useEffect(() => {
+        if (resolvedParams?.id) {
+            fetchEvent(resolvedParams.id);
+        }
+    }, [resolvedParams?.id, fetchEvent]);
 
-        if (patterns.visa.test(cleanNumber)) return 'Visa';
-        if (patterns.mastercard.test(cleanNumber)) return 'MasterCard';
-        if (patterns.amex.test(cleanNumber)) return 'American Express';
-        
-        return '';
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
+        const field = e.target.name as keyof typeof paymentInfo;
+        const value = e.target.value as string;
+
+        updatePaymentInfo({ [field]: value });
+        validateField(field, value);
     };
 
-    // Validación de número de tarjeta usando el algoritmo de Luhn
-    const validateCardNumber = (number: string): boolean => {
-        const digits = number.replace(/\s+/g, '').split('').map(Number);
-        let sum = 0;
-        let isEven = false;
-
-        for (let i = digits.length - 1; i >= 0; i--) {
-            let digit = digits[i];
-
-            if (isEven) {
-                digit *= 2;
-                if (digit > 9) {
-                    digit -= 9;
-                }
-            }
-
-            sum += digit;
-            isEven = !isEven;
-        }
-
-        return sum % 10 === 0;
+    const handleBack = () => {
+        router.push(`/event/${resolvedParams.id}/personal-info`);
     };
 
-    const formatCardNumber = (value: string): string => {
-        const cleaned = value.replace(/\s+/g, '');
-        const parts = [];
-        
-        for (let i = 0; i < cleaned.length; i += 4) {
-            parts.push(cleaned.substr(i, 4));
-        }
-        
-        return parts.join(' ');
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        let formattedValue = value;
-
-        // Formateo específico para cada campo
-        switch (name) {
-            case 'cardNumber':
-                formattedValue = formatCardNumber(value);
-                const detectedType = detectCardType(value);
-                setCardType(detectedType);
-                break;
-            case 'expiryDate':
-                // Formato MM/YY
-                formattedValue = value
-                    .replace(/\D/g, '')
-                    .replace(/^([0-9]{2})/, '$1/')
-                    .substr(0, 5);
-                break;
-            case 'cvv':
-                // Solo números, máximo 4 dígitos
-                formattedValue = value.replace(/\D/g, '').substr(0, 4);
-                break;
-            case 'cardHolder':
-                // Solo letras y espacios
-                formattedValue = value.replace(/[^a-zA-Z\s]/g, '').toUpperCase();
-                break;
-        }
-
-        setFormData(prev => ({
-            ...prev,
-            [name]: formattedValue
-        }));
-
-        // Limpiar error al escribir
-        if (errors[name as keyof FormErrors]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: undefined
-            }));
-        }
-    };
-
-    const validateForm = (): boolean => {
-        const newErrors: FormErrors = {};
-        const currentYear = new Date().getFullYear() % 100;
-        const currentMonth = new Date().getMonth() + 1;
-
-        // Validación del número de tarjeta
-        if (!formData.cardNumber.trim()) {
-            newErrors.cardNumber = 'El número de tarjeta es requerido';
-        } else if (!validateCardNumber(formData.cardNumber)) {
-            newErrors.cardNumber = 'Número de tarjeta inválido';
-        }
-
-        // Validación del titular
-        if (!formData.cardHolder.trim()) {
-            newErrors.cardHolder = 'El nombre del titular es requerido';
-        } else if (formData.cardHolder.length < 3) {
-            newErrors.cardHolder = 'Nombre del titular demasiado corto';
-        }
-
-        // Validación de fecha de vencimiento
-        if (!formData.expiryDate) {
-            newErrors.expiryDate = 'La fecha de vencimiento es requerida';
-        } else {
-            const [month, year] = formData.expiryDate.split('/').map(Number);
-            if (month < 1 || month > 12) {
-                newErrors.expiryDate = 'Mes inválido';
-            } else if (year < currentYear || (year === currentYear && month < currentMonth)) {
-                newErrors.expiryDate = 'La tarjeta está vencida';
-            }
-        }
-
-        // Validación del CVV
-        if (!formData.cvv) {
-            newErrors.cvv = 'El código de seguridad es requerido';
-        } else if (formData.cvv.length < 3) {
-            newErrors.cvv = 'Código de seguridad inválido';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleNext = () => {
         if (validateForm()) {
-            // Aquí iría la lógica de procesamiento del pago
-            console.log('Procesando pago...', formData);
+            // Here you would typically make the payment API call
+            router.push(`/event/${resolvedParams.id}/confirmation`);
         }
     };
+
+    const getRegistrationAmount = () => {
+        if (!event) return 0;
+        switch (registrationType) {
+            case 'individual':
+                return parseFloat(event.individual_price) + parseFloat(event.individual_fee);
+            case 'groups':
+                return parseFloat(event.group_price) + parseFloat(event.group_fee);
+            case 'spectator':
+                return parseFloat(event.spectator_price) + parseFloat(event.spectator_fee);
+            default:
+                return 0;
+        }
+    };
+
+    if (!resolvedParams || isLoading) {
+        return (
+            <Container>
+                <Card className="registration-card">
+                    <Row justify="center">
+                        <Typography type="title">Cargando...</Typography>
+                    </Row>
+                </Card>
+            </Container>
+        );
+    }
+
+    if (error) {
+        return (
+            <Container>
+                <Card className="registration-card">
+                    <Row justify="center">
+                        <Typography type="title">Error: {error}</Typography>
+                    </Row>
+                </Card>
+            </Container>
+        );
+    }
+
+    if (!event) {
+        return null;
+    }
+
+    const amount = getRegistrationAmount();
 
     return (
         <Container>
             <Card className="registration-card">
                 <Row justify="center">
-                    <Typography type="title">Confirmación de Pago</Typography>
+                    <Typography type="title">
+                        Pago
+                    </Typography>
                 </Row>
 
-                <div style={{ margin: '2rem 0' }}>
+                <Row>
                     <ProgressBar />
-                </div>
+                </Row>
 
-                <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <Typography type="subtitle" className="mb-4">
-                            Detalles de la Tarjeta {cardType && `(${cardType})`}
-                        </Typography>
+                <Row style={{ flexDirection: "column" }} justify="center" gap={1}>
+                    <Typography type="subtitle">
+                        Detalle de pago
+                    </Typography>
+                    <Typography>
+                        Monto a Pagar: Q{amount.toFixed(2)}
+                    </Typography>
+                </Row>
+
+                <form onSubmit={(e) => e.preventDefault()} style={{ width: '100%' }}>
+                    <Row gap={1}>
+                        <TextField
+                            fullWidth
+                            label="Número de Tarjeta"
+                            name="cardNumber"
+                            value={paymentInfo.cardNumber}
+                            onChange={handleInputChange}
+                            error={!!errors.cardNumber}
+                            helperText={errors.cardNumber}
+                            placeholder="1234 5678 9012 3456"
+                        />
 
                         <TextField
                             fullWidth
                             label="Nombre del Titular"
                             name="cardHolder"
-                            value={formData.cardHolder}
+                            value={paymentInfo.cardHolder}
                             onChange={handleInputChange}
                             error={!!errors.cardHolder}
                             helperText={errors.cardHolder}
-                            className="mb-4"
                         />
-                        
+
+                        <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+                            <FormControl fullWidth error={!!errors.expiryMonth}>
+                                <InputLabel id="expiry-month-label">Mes</InputLabel>
+                                <Select
+                                    labelId="expiry-month-label"
+                                    name="expiryMonth"
+                                    value={paymentInfo.expiryMonth}
+                                    onChange={handleInputChange}
+                                    label="Mes"
+                                >
+                                    {Array.from({ length: 12 }, (_, i) => (
+                                        <MenuItem key={i + 1} value={(i + 1).toString().padStart(2, '0')}>
+                                            {(i + 1).toString().padStart(2, '0')}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                                {errors.expiryMonth && (
+                                    <FormHelperText>{errors.expiryMonth}</FormHelperText>
+                                )}
+                            </FormControl>
+
+                            <FormControl fullWidth error={!!errors.expiryYear}>
+                                <InputLabel id="expiry-year-label">Año</InputLabel>
+                                <Select
+                                    labelId="expiry-year-label"
+                                    name="expiryYear"
+                                    value={paymentInfo.expiryYear}
+                                    onChange={handleInputChange}
+                                    label="Año"
+                                >
+                                    {Array.from({ length: 10 }, (_, i) => {
+                                        const year = new Date().getFullYear() + i;
+                                        return (
+                                            <MenuItem key={year} value={year.toString()}>
+                                                {year}
+                                            </MenuItem>
+                                        );
+                                    })}
+                                </Select>
+                                {errors.expiryYear && (
+                                    <FormHelperText>{errors.expiryYear}</FormHelperText>
+                                )}
+                            </FormControl>
+                        </Box>
+
                         <TextField
                             fullWidth
-                            label="Número de Tarjeta"
-                            name="cardNumber"
-                            value={formData.cardNumber}
+                            label="CVV"
+                            name="cvv"
+                            value={paymentInfo.cvv}
                             onChange={handleInputChange}
-                            error={!!errors.cardNumber}
-                            helperText={errors.cardNumber}
-                            inputProps={{ maxLength: 19 }}
-                            className="mb-4"
+                            error={!!errors.cvv}
+                            helperText={errors.cvv}
+                            placeholder={paymentInfo.cardType === 'amex' ? '4 dígitos' : '3 dígitos'}
                         />
+                    </Row>
 
-                        <Row justify='space-between'>
-                            <Cell style={{padding: 0}} xs={4} className="pr-2">
-                                <TextField
-                                    fullWidth
-                                    label="MM/YY"
-                                    name="expiryDate"
-                                    value={formData.expiryDate}
-                                    onChange={handleInputChange}
-                                    error={!!errors.expiryDate}
-                                    helperText={errors.expiryDate}
-                                    inputProps={{ maxLength: 5 }}
-                                />
-                            </Cell>
-                            <Cell style={{padding: 0}} xs={4} className="pl-2">
-                                <TextField
-                                    fullWidth
-                                    label="CVV"
-                                    name="cvv"
-                                    type="password"
-                                    value={formData.cvv}
-                                    onChange={handleInputChange}
-                                    error={!!errors.cvv}
-                                    helperText={errors.cvv}
-                                    inputProps={{ maxLength: 4 }}
-                                />
-                            </Cell>
-                        </Row>
-                        
-
-                        {/* Total */}
-                        <Typography type="subtitle" className="mb-2">
-                            Total a Pagar
-                        </Typography>
-                        <Typography className="text-2xl font-bold text-blue-600">
-                            GTQ 100.00
-                        </Typography>
-                    </div>
-
-                    {/* Botones de acción */}
                     <Row justify="center" style={{ marginTop: '2rem' }}>
                         <Cell xs={4}>
-                            <Button 
-                                variant="outlined"
-                                onClick={() => router.push(`/event/${resolvedParams.id}/personal-info`)}
-                                fullWidth
-                            >
-                                Anterior
+                            <Button variant="outlined" onClick={handleBack} fullWidth>
+                                Volver
                             </Button>
                         </Cell>
                         <Cell xs={4}>
-                            <Button 
-                                variant="filled"
-                                type="submit"
-                                fullWidth
-                            >
+                            <Button variant="filled" onClick={handleNext} fullWidth>
                                 Pagar
                             </Button>
                         </Cell>

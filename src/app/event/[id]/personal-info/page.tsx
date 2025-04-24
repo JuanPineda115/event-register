@@ -46,20 +46,14 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
         setCurrentStep,
         validateField,
         validateForm,
-        formErrors = {},
-        currentStepIndex
+        formErrors = {}
     } = useRegistrationStore();
 
     const resolvedParams = React.use(params);
 
     useEffect(() => {
-        // If user tries to access this step without completing previous steps
-        if (currentStepIndex < 2) {
-            router.push(`/event/${resolvedParams.id}/event-detail`);
-            return;
-        }
         setCurrentStep(2);
-    }, [setCurrentStep, currentStepIndex, router, resolvedParams.id]);
+    }, [setCurrentStep]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>) => {
         const field = e.target.name as keyof typeof personalInfo;
@@ -87,7 +81,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
     };
 
     const handleNext = () => {
-        console.log('Validating form...');
+        console.log(validateForm());
         if (validateForm()) {
             router.push(`/event/${resolvedParams.id}/payment`);
         }
@@ -225,7 +219,6 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                                         onChange={handleInputChange}
                                         label="País"
                                     >
-
                                         {countries.map((country) => (
                                             <MenuItem key={country.code} value={country.code}>
                                                 {country.name} ({country.phoneCode})
@@ -252,7 +245,6 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                                         'Seleccione un país primero'
                                     }
                                 />
-
                             </Cell>
                         </div>
 
@@ -270,7 +262,7 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                                 <MenuItem value="M">M</MenuItem>
                                 <MenuItem value="L">L</MenuItem>
                                 <MenuItem value="XL">XL</MenuItem>
-                                <MenuItem value="2XL">2XL</MenuItem>
+                                <MenuItem value="XXL">XXL</MenuItem>
                             </Select>
                             {formErrors.size && (
                                 <FormHelperText>{formErrors.size}</FormHelperText>
@@ -278,22 +270,14 @@ export default function PersonalInfoPage({ params }: PersonalInfoPageProps) {
                         </FormControl>
                     </Row>
 
-                    <Row justify="space-between" style={{ marginTop: '2rem' }}>
+                    <Row justify="center" style={{ marginTop: '2rem' }}>
                         <Cell xs={4}>
-                            <Button
-                                variant="outlined"
-                                onClick={() => router.push(`/event/${resolvedParams.id}/event-detail`)}
-                                fullWidth
-                            >
+                            <Button variant="outlined" onClick={() => router.push(`/event/${resolvedParams.id}/event-detail`)} fullWidth>
                                 Anterior
                             </Button>
                         </Cell>
                         <Cell xs={4}>
-                            <Button
-                                variant="filled"
-                                onClick={handleNext}
-                                fullWidth
-                            >
+                            <Button variant="filled" onClick={handleNext} fullWidth>
                                 Siguiente
                             </Button>
                         </Cell>
