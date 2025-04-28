@@ -366,16 +366,6 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                         />
                     </Row>
 
-                    {/* Total */}
-                    <Row style={{ flexDirection: "column", marginTop: "1rem" }} justify="center" gap={1}>
-                        <Typography type="subtitle" className="mb-2">
-                            Total a Pagar
-                        </Typography>
-                        <Typography className="text-2xl font-bold text-blue-600">
-                            GTQ {amount.toFixed(2)}
-                        </Typography>
-                    </Row>
-
                     {/* Botones de acción */}
                     <Row justify="space-between" style={{ marginTop: '2rem' }}>
                         <Cell xs={4}>
