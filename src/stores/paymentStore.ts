@@ -10,6 +10,10 @@ export interface PaymentInfo {
   expiryYear: string;
   cvv: string;
   cardType: string;
+  clientCity: string;
+  clientState: string;
+  clientPostalCode: string;
+  clientLocation: string;
 }
 
 export interface PaymentErrors {
@@ -18,6 +22,10 @@ export interface PaymentErrors {
   expiryMonth?: string;
   expiryYear?: string;
   cvv?: string;
+  clientCity?: string;
+  clientState?: string;
+  clientPostalCode?: string;
+  clientLocation?: string;
 }
 
 interface PaymentState {
@@ -36,6 +44,10 @@ const initialPaymentInfo: PaymentInfo = {
   expiryYear: '',
   cvv: '',
   cardType: 'visa',
+  clientCity: '',
+  clientState: '',
+  clientPostalCode: '',
+  clientLocation: '',
 };
 
 const initialErrors: PaymentErrors = {};
@@ -97,7 +109,6 @@ const validateExpiryYear = (value: string): string | undefined => {
   return undefined;
 };
 
-
 const validateCVV = (value: string, cardType: PaymentInfo['cardType']): string | undefined => {
   if (!value) return 'El CVV es requerido';
 
@@ -122,6 +133,30 @@ const validateCVV = (value: string, cardType: PaymentInfo['cardType']): string |
   return undefined;
 };
 
+// Nuevas validaciones para campos de dirección
+const validateClientCity = (value: string): string | undefined => {
+  if (!value) return 'La ciudad es requerida';
+  if (value.length < 2) return 'La ciudad debe tener al menos 2 caracteres';
+  return undefined;
+};
+
+const validateClientState = (value: string): string | undefined => {
+  if (!value) return 'El departamento es requerido';
+  if (value.length < 2) return 'El departamento debe tener al menos 2 caracteres';
+  return undefined;
+};
+
+const validateClientPostalCode = (value: string): string | undefined => {
+  if (!value) return 'El código postal es requerido';
+  if (!/^\d{5}$/.test(value)) return 'El código postal debe tener 5 dígitos';
+  return undefined;
+};
+
+const validateClientLocation = (value: string): string | undefined => {
+  if (!value) return 'La dirección es requerida';
+  if (value.length < 5) return 'La dirección debe tener al menos 5 caracteres';
+  return undefined;
+};
 
 export const usePaymentStore = create<PaymentState>()(
   persist(
@@ -159,6 +194,18 @@ export const usePaymentStore = create<PaymentState>()(
             case 'cvv':
               error = validateCVV(value, state.paymentInfo.cardType);
               break;
+            case 'clientCity':
+              error = validateClientCity(value);
+              break;
+            case 'clientState':
+              error = validateClientState(value);
+              break;
+            case 'clientPostalCode':
+              error = validateClientPostalCode(value);
+              break;
+            case 'clientLocation':
+              error = validateClientLocation(value);
+              break;
           }
 
           return {
@@ -195,6 +242,18 @@ export const usePaymentStore = create<PaymentState>()(
               break;
             case 'cvv':
               error = validateCVV(value, paymentInfo.cardType);
+              break;
+            case 'clientCity':
+              error = validateClientCity(value);
+              break;
+            case 'clientState':
+              error = validateClientState(value);
+              break;
+            case 'clientPostalCode':
+              error = validateClientPostalCode(value);
+              break;
+            case 'clientLocation':
+              error = validateClientLocation(value);
               break;
           }
 

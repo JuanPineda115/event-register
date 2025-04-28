@@ -6,9 +6,9 @@ import Container from '@/Components/Container/Container';
 import Typography from '@/Components/Typography/Typography';
 import Row from '@/Components/Row/Row';
 import Button from '@/Components/Button/Button';
-import ProgressBar from '@/Components/ProgressBar/ProgressBar';
 import { useRegistrationStore } from '@/stores/registrationStore';
 import eventStore from '@/stores/eventStore';
+import LogoHybrid from '@/assets/logos/HB Negro.png'
 
 interface EventPageProps {
     params: Promise<{
@@ -37,7 +37,7 @@ export default function EventPage({ params }: EventPageProps) {
     // Handle 404 redirect
     useEffect(() => {
         if (error === 'Event not found') {
-            router.push('/404');
+            // router.push('/404');
         }
     }, [error, router]);
 
@@ -73,6 +73,24 @@ export default function EventPage({ params }: EventPageProps) {
         <Container>
             <Card className="registration-card">
                 <Row justify="center" >
+                <img
+                            src={LogoHybrid.src}
+                            alt="Logo Hybrid Negro"
+                            style={{
+                                width: '120px',
+                                height: '120px',
+                                objectFit: 'cover'
+                            }}
+                        />
+                </Row>
+
+                <Row justify="center" >
+                    <Typography type="text">
+                        {event.description}
+                    </Typography>
+                </Row>
+
+                <Row justify="center" >
                     {event.image_url && (
                         <img
                             src={event.image_url}
@@ -85,20 +103,6 @@ export default function EventPage({ params }: EventPageProps) {
                             }}
                         />
                     )}
-                </Row>
-                <Row justify="center" >
-                    <Typography type="title">
-                        {event.name}
-                    </Typography>
-                </Row>
-                <Row justify="center" >
-                    <Typography type="text">
-                        {event.description}
-                    </Typography>
-                </Row>
-
-                <Row>
-                    <ProgressBar />
                 </Row>
 
                 <Row justify="center" style={{ marginTop: '2rem' }}>

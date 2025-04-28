@@ -284,20 +284,20 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                             <FormControl fullWidth error={!!errors.expiryYear}>
                                 <InputLabel id="expiry-year-label">Año</InputLabel>
                                 <Select
-                                labelId="expiry-year-label"
-                                name="expiryYear"
-                                value={paymentInfo.expiryYear}
-                                onChange={handleInputChange}
-                                label="Año"
+                                    labelId="expiry-year-label"
+                                    name="expiryYear"
+                                    value={paymentInfo.expiryYear}
+                                    onChange={handleInputChange}
+                                    label="Año"
                                 >
-                                {Array.from({ length: 20 }, (_, i) => {
-                                    const year = 2020 + i;
-                                    return (
-                                    <MenuItem key={year} value={year.toString()}>
-                                        {year}
-                                    </MenuItem>
-                                    );
-                                })}
+                                    {Array.from({ length: 20 }, (_, i) => {
+                                        const year = 2020 + i;
+                                        return (
+                                            <MenuItem key={year} value={year.toString()}>
+                                                {year}
+                                            </MenuItem>
+                                        );
+                                    })}
                                 </Select>
                                 {errors.expiryYear && (
                                     <FormHelperText>{errors.expiryYear}</FormHelperText>
@@ -315,16 +315,84 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                             helperText={errors.cvv}
                             placeholder={paymentInfo.cardType === 'amex' ? '4 dígitos' : '3 dígitos'}
                         />
+
+                        <Typography type="subtitle" className="mt-6 mb-4">
+                            Información de Facturación
+                        </Typography>
+
+                        <TextField
+                            fullWidth
+                            label="Ciudad"
+                            name="clientCity"
+                            value={paymentInfo.clientCity}
+                            onChange={handleInputChange}
+                            error={!!errors.clientCity}
+                            helperText={errors.clientCity}
+                            className="mb-4"
+                        />
+
+                        <TextField
+                            fullWidth
+                            label="Departamento"
+                            name="clientState"
+                            value={paymentInfo.clientState}
+                            onChange={handleInputChange}
+                            error={!!errors.clientState}
+                            helperText={errors.clientState}
+                            className="mb-4"
+                        />
+
+                        <TextField
+                            fullWidth
+                            label="Código Postal"
+                            name="clientPostalCode"
+                            value={paymentInfo.clientPostalCode}
+                            onChange={handleInputChange}
+                            error={!!errors.clientPostalCode}
+                            helperText={errors.clientPostalCode}
+                            className="mb-4"
+                            inputProps={{ maxLength: 5 }}
+                        />
+
+                        <TextField
+                            fullWidth
+                            label="Dirección"
+                            name="clientLocation"
+                            value={paymentInfo.clientLocation}
+                            onChange={handleInputChange}
+                            error={!!errors.clientLocation}
+                            helperText={errors.clientLocation}
+                            className="mb-4"
+                        />
                     </Row>
 
-                    <Row justify="center" style={{ marginTop: '2rem' }}>
+                    {/* Total */}
+                    <Row style={{ flexDirection: "column", marginTop: "1rem" }} justify="center" gap={1}>
+                        <Typography type="subtitle" className="mb-2">
+                            Total a Pagar
+                        </Typography>
+                        <Typography className="text-2xl font-bold text-blue-600">
+                            GTQ {amount.toFixed(2)}
+                        </Typography>
+                    </Row>
+
+                    {/* Botones de acción */}
+                    <Row justify="space-between" style={{ marginTop: '2rem' }}>
                         <Cell xs={4}>
-                            <Button variant="outlined" onClick={handleBack} fullWidth>
-                                Volver
+                            <Button
+                                variant="outlined"
+                                onClick={handleBack}
+                                fullWidth
+                            >
+                                Anterior
                             </Button>
                         </Cell>
                         <Cell xs={4}>
-                            <Button variant="filled" onClick={handleNext} fullWidth>
+                            <Button
+                                variant="filled"
+                                type="submit"
+                                fullWidth
+                            >
                                 Pagar
                             </Button>
                         </Cell>
