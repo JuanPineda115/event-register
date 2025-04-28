@@ -115,7 +115,7 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                             card_number: paymentInfo.cardNumber,
                             cvv: paymentInfo.cvv,
 
-                            simulate: true
+                            simulate: false
                         } as individualRegistrationRequest;
                         break;
 
@@ -284,20 +284,20 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                             <FormControl fullWidth error={!!errors.expiryYear}>
                                 <InputLabel id="expiry-year-label">Año</InputLabel>
                                 <Select
-                                    labelId="expiry-year-label"
-                                    name="expiryYear"
-                                    value={paymentInfo.expiryYear}
-                                    onChange={handleInputChange}
-                                    label="Año"
+                                labelId="expiry-year-label"
+                                name="expiryYear"
+                                value={paymentInfo.expiryYear}
+                                onChange={handleInputChange}
+                                label="Año"
                                 >
-                                    {Array.from({ length: 10 }, (_, i) => {
-                                        const year = new Date().getFullYear() + i;
-                                        return (
-                                            <MenuItem key={year} value={year.toString()}>
-                                                {year}
-                                            </MenuItem>
-                                        );
-                                    })}
+                                {Array.from({ length: 20 }, (_, i) => {
+                                    const year = 2020 + i;
+                                    return (
+                                    <MenuItem key={year} value={year.toString()}>
+                                        {year}
+                                    </MenuItem>
+                                    );
+                                })}
                                 </Select>
                                 {errors.expiryYear && (
                                     <FormHelperText>{errors.expiryYear}</FormHelperText>

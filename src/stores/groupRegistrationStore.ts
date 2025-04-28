@@ -234,7 +234,7 @@ export const useGroupRegistrationStore = create<GroupRegistrationState>()(
           card_number: paymentInfo.cardNumber,
           cvv: paymentInfo.cvv,
 
-          simulate: true
+          simulate: false
         };
       },
 

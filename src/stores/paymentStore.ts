@@ -94,25 +94,34 @@ const validateExpiryYear = (value: string): string | undefined => {
   if (!validationPatterns.expiryYear.test(value)) {
     return 'El año de expiración no es válido';
   }
-  const currentYear = new Date().getFullYear();
-  const year = parseInt(value);
-  if (year < currentYear) {
-    return 'El año de expiración no puede ser anterior al año actual';
-  }
   return undefined;
 };
 
+
 const validateCVV = (value: string, cardType: PaymentInfo['cardType']): string | undefined => {
   if (!value) return 'El CVV es requerido';
-  const expectedLength = cardType === 'amex' ? 4 : 3;
-  if (value.length !== expectedLength) {
-    return `El CVV debe tener ${expectedLength} dígitos`;
+
+  let isValidLength = false;
+
+  if (cardType === 'amex') {
+    isValidLength = value.length === 4;
+  } else if (cardType === 'visa') {
+    isValidLength = value.length === 3 || value.length === 4;
+  } else {
+    isValidLength = value.length === 3;
   }
+
+  if (!isValidLength) {
+    return `El CVV debe tener ${cardType === 'amex' ? '4' : cardType === 'visa' ? '3 o 4' : '3'} dígitos`;
+  }
+
   if (!validationPatterns.cvv.test(value)) {
     return 'El CVV no es válido';
   }
+
   return undefined;
 };
+
 
 export const usePaymentStore = create<PaymentState>()(
   persist(

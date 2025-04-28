@@ -128,13 +128,13 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           <Typography type="subtitle">Precios</Typography>
           {event.individual_price && (
             <Typography type="text">
-              Precio individual: Q{event.individual_price}
+              Individuales RX (H/M) : Q{event.individual_price}
               {event.individual_fee && ` + Fee: Q${event.individual_fee}`}
             </Typography>
           )}
           {event.group_price && (
             <Typography type="text">
-              Precio por equipo: Q{event.group_price}
+              Parejas Open: ( HH / MM / HM): Q{event.group_price}
               {event.group_fee && ` + Fee: Q${event.group_fee}`}
             </Typography>
           )}

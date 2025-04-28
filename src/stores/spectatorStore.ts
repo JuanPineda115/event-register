@@ -203,7 +203,7 @@ export const useSpectatorStore = create<SpectatorState>()(
                     card_number: paymentInfo.cardNumber,
                     cvv: paymentInfo.cvv,
 
-                    simulate: true
+                    simulate: false
                 };
             },
         }),
